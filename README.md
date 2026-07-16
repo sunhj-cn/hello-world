@@ -1,3 +1,31 @@
-# hello-world
-here is a edited version or README.md
-I would take this as changes to the file.
+# 荒野突围
+
+一个无需依赖、打开浏览器即可游玩的原创俯视角战术竞技游戏。体验包含运输机跳伞、搜索物资、安全区收缩、机器人对战、双武器切换、护甲与治疗、战术地图以及最终排名。
+
+## 运行
+
+直接打开 `index.html`，或在项目目录启动一个静态服务器：
+
+```bash
+python3 -m http.server 8000
+```
+
+然后访问 <http://localhost:8000>。
+
+## 操作
+
+- `WASD` / 方向键：移动
+- 鼠标：瞄准；左键：射击
+- `Shift`：疾跑
+- `F`：拾取物资
+- `R`：换弹
+- `H`：使用急救包
+- `1` / `2`：切换武器
+- `M`：打开战术地图
+- `空格`：跳伞
+
+触屏设备提供双虚拟摇杆、拾取和跳伞按钮。
+
+## 说明
+
+本项目使用 Canvas、CSS 和原生 JavaScript 实现，不包含第三方游戏的商标、代码或素材。
