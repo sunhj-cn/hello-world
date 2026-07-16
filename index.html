@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#111712" />
+    <title>荒野突围 · 战术竞技</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <canvas id="game" aria-label="荒野突围游戏画布"></canvas>
+
+    <section id="lobby" class="screen active">
+      <div class="lobby-noise"></div>
+      <div class="brand">
+        <span class="brand-kicker">TACTICAL SURVIVAL</span>
+        <h1>荒野<span>突围</span></h1>
+        <p>原创俯视角战术竞技体验</p>
+      </div>
+      <div class="operator">
+        <div class="operator-glow"></div>
+        <div class="operator-body">
+          <div class="operator-head"></div>
+          <div class="operator-vest"></div>
+          <div class="operator-rifle"></div>
+        </div>
+      </div>
+      <div class="lobby-panel">
+        <div class="season"><b>S1</b><span>边境行动</span></div>
+        <div class="mode-card">
+          <div>
+            <small>经典模式 · 单人</small>
+            <strong>海岛前线</strong>
+          </div>
+          <span class="mode-tag">第三人称</span>
+        </div>
+        <button id="startBtn" class="primary-btn"><span>开始行动</span><small>24 人战术演习</small></button>
+        <div class="lobby-tips">电脑：WASD 移动 · 鼠标瞄准射击　|　手机：双摇杆操作</div>
+      </div>
+      <div class="version">WILDLAND PROTOCOL · BUILD 01</div>
+    </section>
+
+    <div id="hud" class="hidden">
+      <header class="top-hud">
+        <div class="compass"><span id="compassText">N　15　NE　60　E</span><i></i></div>
+        <div class="match-stats">
+          <div><strong id="aliveCount">24</strong><small>生存</small></div>
+          <div><strong id="killCount">0</strong><small>淘汰</small></div>
+        </div>
+      </header>
+
+      <aside class="mission">
+        <span class="mission-icon">!</span>
+        <div><small id="zoneLabel">安全区将在</small><strong id="zoneTimer">00:45</strong></div>
+      </aside>
+
+      <div class="minimap-wrap">
+        <canvas id="minimap" width="180" height="180"></canvas>
+        <div class="map-label">海岛前线</div>
+      </div>
+
+      <div id="killFeed" class="kill-feed"></div>
+      <div id="pickupPrompt" class="pickup-prompt hidden"><kbd>F</kbd><div><small>附近</small><strong id="pickupName">物资</strong></div></div>
+      <div id="planePrompt" class="plane-prompt hidden"><button id="jumpBtn">跳伞</button><small>选择合适的落点</small></div>
+      <div id="toast" class="toast"></div>
+      <div id="crosshair" class="crosshair"><i></i><i></i><i></i><i></i><b></b></div>
+
+      <div class="status-bar">
+        <div class="player-card">
+          <div class="avatar">01</div>
+          <div class="vitals">
+            <div class="armor-row"><span>护甲</span><div><i id="armorFill"></i></div></div>
+            <div class="health-row"><span>生命</span><div><i id="healthFill"></i></div><b id="healthText">100</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="weapon-hud">
+        <div class="weapon-name"><span id="fireMode">自动</span><strong id="weaponName">R-5.56</strong></div>
+        <div class="ammo"><strong id="magAmmo">30</strong><span>/</span><small id="reserveAmmo">120</small></div>
+        <div class="weapon-slots">
+          <button class="weapon-slot active" data-slot="0"><kbd>1</kbd><span>R-5.56</span></button>
+          <button class="weapon-slot" data-slot="1"><kbd>2</kbd><span>V9 冲锋枪</span></button>
+        </div>
+      </div>
+
+      <div class="items">
+        <button id="healBtn"><span>＋</span><b id="medCount">3</b><small>急救</small></button>
+        <button id="reloadBtn"><span>↻</span><small>换弹</small></button>
+        <button id="mapBtn"><span>◇</span><small>地图</small></button>
+      </div>
+
+      <div id="mobileControls" class="mobile-controls">
+        <div id="moveStick" class="joystick"><i></i></div>
+        <div id="aimStick" class="joystick aim"><i></i><b>开火</b></div>
+        <button id="mobilePickup" class="action-btn pickup">拾取</button>
+        <button id="mobileJump" class="action-btn jump">跳伞</button>
+      </div>
+    </div>
+
+    <section id="result" class="screen result-screen">
+      <div class="result-card">
+        <small id="resultKicker">本次演习结束</small>
+        <h2 id="resultTitle">再接再厉</h2>
+        <div class="result-rank">第 <strong id="rankNumber">2</strong> 名</div>
+        <div class="result-stats">
+          <div><strong id="resultKills">0</strong><span>淘汰</span></div>
+          <div><strong id="resultDamage">0</strong><span>伤害</span></div>
+          <div><strong id="resultTime">00:00</strong><span>生存时间</span></div>
+        </div>
+        <button id="restartBtn" class="primary-btn"><span>再次行动</span></button>
+        <button id="lobbyBtn" class="ghost-btn">返回大厅</button>
+      </div>
+    </section>
+
+    <section id="fullMap" class="map-overlay hidden">
+      <div class="map-head"><h2>战术地图</h2><button id="closeMap">关闭　M</button></div>
+      <canvas id="largeMap" width="700" height="700"></canvas>
+      <div class="map-legend"><span><i class="safe"></i>安全区</span><span><i class="danger"></i>信号区</span><span><i class="you"></i>你的位置</span></div>
+    </section>
+
+    <script src="game.js"></script>
+  </body>
+</html>
