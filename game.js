@@ -148,9 +148,19 @@
           for (let j = 0; j < lootCount; j += 1) {
             const roll = random(0, 1);
             const type = roll < 0.5 ? "ammo" : roll < 0.72 ? "med" : roll < 0.9 ? "armor" : "crate";
+            const side = Math.floor(random(0, 4));
+            let lootX;
+            let lootY;
+            if (side === 0 || side === 2) {
+              lootX = building.x + random(16, building.w - 16);
+              lootY = side === 0 ? building.y - 20 : building.y + building.h + 20;
+            } else {
+              lootX = side === 1 ? building.x + building.w + 20 : building.x - 20;
+              lootY = building.y + random(16, building.h - 16);
+            }
             loot.push({
-              x: building.x + random(14, building.w - 14),
-              y: building.y + random(14, building.h - 14),
+              x: clamp(lootX, 25, WORLD - 25),
+              y: clamp(lootY, 25, WORLD - 25),
               type,
               active: true,
               spin: random(0, TAU),
