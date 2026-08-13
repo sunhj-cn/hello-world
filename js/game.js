@@ -95,7 +95,7 @@
     timeLeft = spec.bonus || opts.keepTime ? timeLeft : spec.time;
     timeAcc = 0;
     starT = 0;
-    invuln = opts.keepInvuln ? 60 : 0;
+    invuln = 40;
     growFlash = 0;
     flagSlide = 0;
     fireCd = 0;
@@ -419,7 +419,7 @@
     if (player.vx < -max) player.vx = -max;
 
     if (inp.jumpPressed && player.onGround) {
-      player.vy = Math.abs(player.vx) > 1.8 ? -5.55 : -5.05;
+      player.vy = Math.abs(player.vx) > 1.6 ? -6.15 : -5.55;
       player.onGround = false;
       CAP.audio.play("jump");
       combo = 0;
@@ -711,7 +711,8 @@
       defeatEnemy(e, true);
       return;
     }
-    const stomp = player.vy > 0 && player.y + player.h - player.vy <= e.y + 6;
+    const feet = player.y + player.h;
+    const stomp = !player.onGround && player.vy >= -0.2 && feet <= e.y + 12;
     if (stomp) {
       defeatEnemy(e, false);
       player.vy = inp.jump ? -4.6 : -2.8;
@@ -858,7 +859,7 @@
         state = "play";
         const music = world.theme === "underground" ? "underground" : "overworld";
         CAP.audio.playMusic(music);
-        if (world.id === "1-1") showToast("水管上按 ▼ 进入", 150);
+        if (world.id === "1-1" && save.lives === 3 && save.score === 0) showToast("水管上按 ▼ 进入", 150);
       }
     } else if (state === "play") updatePlay();
     else if (state === "dead") updateDead();
@@ -1041,7 +1042,7 @@
     ctx.fillRect(0, 0, VIEW_W, 28);
     drawText(8, 6, "CAP", 1, "#FCFCFC");
     drawText(8, 14, pad(save.score, 6), 1, "#FCFCFC");
-    ctx.drawImage(SPR.coin[(frame >> 2) % 4], 88, 10);
+    ctx.drawImage(SPR.coin[0], 88, 10);
     drawText(100, 14, "X" + pad(save.coins, 2), 1, "#FCFCFC");
     drawText(160, 6, "WORLD", 1, "#FCFCFC");
     drawText(168, 14, world ? world.id : "1-1", 1, "#FCFCFC");
@@ -1062,12 +1063,12 @@
     drawText(40, 58, "CAP QUEST", 3, "#FCFCFC");
     drawText(70, 86, "SUPER CAP QUEST", 1, "#F8D800");
 
-    ctx.drawImage(SPR.small.stand, 78, 150);
-    ctx.drawImage(SPR.walker[(frame >> 4) % 2], 130, 160);
-    ctx.drawImage(SPR.coin[(frame >> 2) % 4], 170, 164);
+    ctx.drawImage(SPR.small.stand, 78, 192);
+    ctx.drawImage(SPR.walker[(frame >> 4) % 2], 148, 192);
+    ctx.drawImage(SPR.coin[0], 188, 196);
 
-    if ((frame >> 4) & 1) drawText(52, 118, "TAP OR PRESS START", 1, "#FCFCFC");
-    drawText(24, 196, "A JUMP   B RUN FIRE", 1, "#1818A8");
+    if ((frame >> 4) & 1) drawText(52, 112, "TAP OR PRESS START", 1, "#FCFCFC");
+    drawText(36, 132, "A JUMP   B RUN FIRE", 1, "#1818A8");
     drawText(16, 228, "ORIGINAL TRIBUTE GAME", 1, "#FCFCFC");
   }
 

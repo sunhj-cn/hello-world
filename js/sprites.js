@@ -87,7 +87,7 @@
   const smallStand = [
     "    rrrr    ",
     "   rrrrrr   ",
-    "   rrrrrr   ",
+    "  rrrrrrrr  ",
     "   nsssn    ",
     "  nsssssn   ",
     "  nsksskn   ",
@@ -106,7 +106,7 @@
   const smallWalk1 = [
     "    rrrr    ",
     "   rrrrrr   ",
-    "   rrrrrr   ",
+    "  rrrrrrrr  ",
     "   nsssn    ",
     "  nsssssn   ",
     "  nsksskn   ",
@@ -125,7 +125,7 @@
   const smallWalk2 = [
     "    rrrr    ",
     "   rrrrrr   ",
-    "   rrrrrr   ",
+    "  rrrrrrrr  ",
     "   nsssn    ",
     "  nsssssn   ",
     "  nsksskn   ",
@@ -144,7 +144,7 @@
   const smallJump = [
     "    rrrr    ",
     "   rrrrrr   ",
-    "   rrrrrr   ",
+    "  rrrrrrrr  ",
     "   nsssn    ",
     "  nsssssn   ",
     "  nsksskn   ",
@@ -163,7 +163,7 @@
   const smallSkid = [
     "    rrrr    ",
     "   rrrrrr   ",
-    "   rrrrrr   ",
+    "  rrrrrrrr  ",
     "   nsssn    ",
     "  nsksssn   ",
     "  nsssskn   ",
@@ -183,6 +183,7 @@
     "            ",
     "    rrrr    ",
     "   rrrrrr   ",
+    "  rrrrrrrr  ",
     "   nsssn    ",
     "  nsksskn   ",
     "  sssssss   ",
@@ -192,7 +193,6 @@
     "  ww b ww   ",
     "   nnnnn    ",
     "  nn   nn   ",
-    "            ",
     "            ",
     "            ",
     "            "
