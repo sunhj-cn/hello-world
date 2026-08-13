@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#5C94FC" />
+  <meta name="description" content="超级帽侠：原创像素平台跳跃网页游戏，手机即可畅玩。" />
+  <title>超级帽侠 Super Cap Quest</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="stage">
+      <canvas id="game" width="256" height="240" aria-label="超级帽侠游戏画面"></canvas>
+      <div id="toast" class="hidden"></div>
+    </div>
+
+    <div id="hud-hint" class="hint">横屏更佳 · A 跳跃 · B 加速/喷火 · ▼ 进水管</div>
+
+    <div id="controls">
+      <div class="cluster left-cluster">
+        <div class="dpad" id="dpad">
+          <button type="button" class="pad-btn" data-btn="left" aria-label="向左">◀</button>
+          <button type="button" class="pad-btn pad-down" data-btn="down" aria-label="下蹲或进入水管">▼</button>
+          <button type="button" class="pad-btn" data-btn="right" aria-label="向右">▶</button>
+        </div>
+      </div>
+      <div class="cluster mid-cluster">
+        <button type="button" class="sys-btn" data-btn="pause" aria-label="暂停">START</button>
+        <button type="button" class="sys-btn" data-btn="mute" aria-label="静音">♪</button>
+      </div>
+      <div class="cluster right-cluster">
+        <button type="button" class="action-btn btn-b" data-btn="run" aria-label="奔跑或开火">B</button>
+        <button type="button" class="action-btn btn-a" data-btn="jump" aria-label="跳跃">A</button>
+      </div>
+    </div>
+  </div>
+
+  <noscript>请启用 JavaScript 后游玩《超级帽侠》。</noscript>
+
+  <script src="js/audio.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
