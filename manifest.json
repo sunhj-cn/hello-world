@@ -1,0 +1,17 @@
+{
+  "name": "超级帽侠 Super Cap Quest",
+  "short_name": "超级帽侠",
+  "description": "原创像素平台跳跃网页游戏",
+  "start_url": ".",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#000000",
+  "theme_color": "#5C94FC",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -1,0 +1,255 @@
+:root {
+  --sky: #5c94fc;
+  --navy: #1a1a40;
+  --red: #b53120;
+  --gold: #f8d800;
+  --panel: rgba(8, 8, 24, 0.72);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  font-family: "Press Start", "Courier New", monospace;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+}
+
+#stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: #000;
+}
+
+#game {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  width: min(100vw, calc(100dvh * 256 / 240));
+  height: auto;
+  max-height: 72dvh;
+  background: var(--sky);
+  display: block;
+  box-shadow: 0 0 0 2px #111, 0 0 40px rgba(92, 148, 252, 0.25);
+}
+
+#toast {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  border: 2px solid #fff;
+  padding: 8px 14px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  pointer-events: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.hint {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #9ab4ff;
+  padding: 4px 8px 0;
+  flex: 0 0 auto;
+}
+
+#controls {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(#141428, #0a0a18);
+  border-top: 3px solid #2a2a55;
+}
+
+.cluster {
+  display: flex;
+  align-items: center;
+}
+
+.left-cluster { justify-content: flex-start; }
+.mid-cluster { justify-content: center; gap: 8px; flex-direction: column; }
+.right-cluster { justify-content: flex-end; gap: 14px; }
+
+.dpad {
+  display: flex;
+  gap: 10px;
+}
+
+.pad-btn,
+.action-btn,
+.sys-btn {
+  border: 0;
+  color: #fff;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.pad-down {
+  width: 58px;
+  height: 58px;
+  align-self: flex-end;
+  font-size: 18px;
+}
+
+.pad-btn {
+  width: 76px;
+  height: 76px;
+  border-radius: 12px;
+  background: linear-gradient(#3a3a58, #1c1c30);
+  box-shadow: inset 0 2px 0 #666, 0 6px 0 #090912;
+  font-size: 26px;
+}
+
+.action-btn {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  font-size: 22px;
+  letter-spacing: 1px;
+  box-shadow: 0 7px 0 #4a1020;
+}
+
+.btn-a {
+  background: radial-gradient(circle at 35% 30%, #ff7a6e, #c43028 62%, #8a1810);
+}
+
+.btn-b {
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle at 35% 30%, #7ad0ff, #2a62d0 62%, #163888);
+  box-shadow: 0 7px 0 #102048;
+  font-size: 18px;
+}
+
+.sys-btn {
+  min-width: 64px;
+  height: 28px;
+  border-radius: 14px;
+  background: #2c2c18;
+  color: #d0d0a8;
+  font-size: 10px;
+  letter-spacing: 1px;
+  box-shadow: 0 3px 0 #111;
+}
+
+.pad-btn:active,
+.action-btn:active,
+.sys-btn:active,
+.pad-btn.held,
+.action-btn.held {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 #090912;
+  filter: brightness(1.15);
+}
+
+@media (orientation: landscape) {
+  #app {
+    display: grid;
+    grid-template-columns: 168px 1fr 160px;
+    grid-template-rows: 1fr auto;
+  }
+
+  #stage {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  #game {
+    max-height: 96dvh;
+    width: min(100%, calc(96dvh * 256 / 240));
+  }
+
+  .hint {
+    display: none;
+  }
+
+  #controls {
+    display: contents;
+  }
+
+  .left-cluster,
+  .right-cluster,
+  .mid-cluster {
+    background: transparent;
+    padding: 0 8px;
+  }
+
+  .left-cluster {
+    grid-column: 1;
+    grid-row: 1;
+    align-items: flex-end;
+    padding-bottom: 8%;
+  }
+
+  .right-cluster {
+    grid-column: 3;
+    grid-row: 1;
+    align-items: flex-end;
+    padding-bottom: 8%;
+  }
+
+  .mid-cluster {
+    grid-column: 2;
+    grid-row: 2;
+    flex-direction: row;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pad-btn {
+    width: 52px;
+    height: 72px;
+    background: rgba(30, 30, 50, 0.55);
+  }
+
+  .pad-down {
+    width: 44px;
+    height: 52px;
+  }
+
+  .action-btn {
+    background-color: rgba(180, 40, 40, 0.8);
+  }
+}
+
+@media (max-width: 420px) and (orientation: portrait) {
+  .pad-btn { width: 64px; height: 64px; }
+  .btn-a { width: 70px; height: 70px; }
+  .btn-b { width: 60px; height: 60px; }
+}
