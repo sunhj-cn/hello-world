@@ -6,7 +6,11 @@
 
 ## 怎么玩
 
-用手机或电脑打开 `index.html` 即可（本地建议用静态服务器，避免部分浏览器限制音频）：
+手机试玩（单文件页面，点开即可）：
+
+https://htmlpreview.github.io/?https://github.com/sunhj-cn/hello-world/blob/cursor/super-plumber-mobile-game-af84/play.html
+
+也可以下载仓库里的 `play.html`，用浏览器直接打开。本地开发可用：
 
 ```bash
 python3 -m http.server 8080
