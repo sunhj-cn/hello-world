@@ -1,0 +1,3319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#5C94FC" />
+  <meta name="description" content="超级帽侠：原创像素平台跳跃网页游戏，手机即可畅玩。" />
+  <title>超级帽侠 Super Cap Quest</title>
+  <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%20shape-rendering%3D%22crispEdges%22%3E%0A%20%20%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%235C94FC%22%2F%3E%0A%20%20%3Crect%20x%3D%2212%22%20y%3D%2218%22%20width%3D%2240%22%20height%3D%2210%22%20fill%3D%22%23B53120%22%2F%3E%0A%20%20%3Crect%20x%3D%228%22%20y%3D%2228%22%20width%3D%2248%22%20height%3D%228%22%20fill%3D%22%23B53120%22%2F%3E%0A%20%20%3Crect%20x%3D%2220%22%20y%3D%2236%22%20width%3D%2224%22%20height%3D%2214%22%20fill%3D%22%23FCA044%22%2F%3E%0A%20%20%3Crect%20x%3D%2224%22%20y%3D%2240%22%20width%3D%226%22%20height%3D%226%22%20fill%3D%22%23181818%22%2F%3E%0A%20%20%3Crect%20x%3D%2236%22%20y%3D%2240%22%20width%3D%226%22%20height%3D%226%22%20fill%3D%22%23181818%22%2F%3E%0A%20%20%3Crect%20x%3D%2218%22%20y%3D%2250%22%20width%3D%2228%22%20height%3D%228%22%20fill%3D%22%231818A8%22%2F%3E%0A%3C%2Fsvg%3E%0A" />
+  <style>
+:root {
+  --sky: #5c94fc;
+  --navy: #1a1a40;
+  --red: #b53120;
+  --gold: #f8d800;
+  --panel: rgba(8, 8, 24, 0.72);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  font-family: "Press Start", "Courier New", monospace;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+}
+
+#stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: #000;
+}
+
+#game {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  width: min(100vw, calc(100dvh * 256 / 240));
+  height: auto;
+  max-height: 72dvh;
+  background: var(--sky);
+  display: block;
+  box-shadow: 0 0 0 2px #111, 0 0 40px rgba(92, 148, 252, 0.25);
+}
+
+#toast {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  border: 2px solid #fff;
+  padding: 8px 14px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  pointer-events: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.hint {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #9ab4ff;
+  padding: 4px 8px 0;
+  flex: 0 0 auto;
+}
+
+#controls {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(#141428, #0a0a18);
+  border-top: 3px solid #2a2a55;
+}
+
+.cluster {
+  display: flex;
+  align-items: center;
+}
+
+.left-cluster { justify-content: flex-start; }
+.mid-cluster { justify-content: center; gap: 8px; flex-direction: column; }
+.right-cluster { justify-content: flex-end; gap: 14px; }
+
+.dpad {
+  display: flex;
+  gap: 10px;
+}
+
+.pad-btn,
+.action-btn,
+.sys-btn {
+  border: 0;
+  color: #fff;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.pad-down {
+  width: 58px;
+  height: 58px;
+  align-self: flex-end;
+  font-size: 18px;
+}
+
+.pad-btn {
+  width: 76px;
+  height: 76px;
+  border-radius: 12px;
+  background: linear-gradient(#3a3a58, #1c1c30);
+  box-shadow: inset 0 2px 0 #666, 0 6px 0 #090912;
+  font-size: 26px;
+}
+
+.action-btn {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  font-size: 22px;
+  letter-spacing: 1px;
+  box-shadow: 0 7px 0 #4a1020;
+}
+
+.btn-a {
+  background: radial-gradient(circle at 35% 30%, #ff7a6e, #c43028 62%, #8a1810);
+}
+
+.btn-b {
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle at 35% 30%, #7ad0ff, #2a62d0 62%, #163888);
+  box-shadow: 0 7px 0 #102048;
+  font-size: 18px;
+}
+
+.sys-btn {
+  min-width: 64px;
+  height: 28px;
+  border-radius: 14px;
+  background: #2c2c18;
+  color: #d0d0a8;
+  font-size: 10px;
+  letter-spacing: 1px;
+  box-shadow: 0 3px 0 #111;
+}
+
+.pad-btn:active,
+.action-btn:active,
+.sys-btn:active,
+.pad-btn.held,
+.action-btn.held {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 #090912;
+  filter: brightness(1.15);
+}
+
+@media (orientation: landscape) {
+  #app {
+    display: grid;
+    grid-template-columns: 168px 1fr 160px;
+    grid-template-rows: 1fr auto;
+  }
+
+  #stage {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  #game {
+    max-height: 96dvh;
+    width: min(100%, calc(96dvh * 256 / 240));
+  }
+
+  .hint {
+    display: none;
+  }
+
+  #controls {
+    display: contents;
+  }
+
+  .left-cluster,
+  .right-cluster,
+  .mid-cluster {
+    background: transparent;
+    padding: 0 8px;
+  }
+
+  .left-cluster {
+    grid-column: 1;
+    grid-row: 1;
+    align-items: flex-end;
+    padding-bottom: 8%;
+  }
+
+  .right-cluster {
+    grid-column: 3;
+    grid-row: 1;
+    align-items: flex-end;
+    padding-bottom: 8%;
+  }
+
+  .mid-cluster {
+    grid-column: 2;
+    grid-row: 2;
+    flex-direction: row;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pad-btn {
+    width: 52px;
+    height: 72px;
+    background: rgba(30, 30, 50, 0.55);
+  }
+
+  .pad-down {
+    width: 44px;
+    height: 52px;
+  }
+
+  .action-btn {
+    background-color: rgba(180, 40, 40, 0.8);
+  }
+}
+
+@media (max-width: 420px) and (orientation: portrait) {
+  .pad-btn { width: 64px; height: 64px; }
+  .btn-a { width: 70px; height: 70px; }
+  .btn-b { width: 60px; height: 60px; }
+}
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <div id="stage">
+      <canvas id="game" width="256" height="240" aria-label="超级帽侠游戏画面"></canvas>
+      <div id="toast" class="hidden"></div>
+    </div>
+
+    <div id="hud-hint" class="hint">横屏更佳 · A 跳跃 · B 加速/喷火 · ▼ 进水管</div>
+
+    <div id="controls">
+      <div class="cluster left-cluster">
+        <div class="dpad" id="dpad">
+          <button type="button" class="pad-btn" data-btn="left" aria-label="向左">◀</button>
+          <button type="button" class="pad-btn pad-down" data-btn="down" aria-label="下蹲或进入水管">▼</button>
+          <button type="button" class="pad-btn" data-btn="right" aria-label="向右">▶</button>
+        </div>
+      </div>
+      <div class="cluster mid-cluster">
+        <button type="button" class="sys-btn" data-btn="pause" aria-label="暂停">START</button>
+        <button type="button" class="sys-btn" data-btn="mute" aria-label="静音">♪</button>
+      </div>
+      <div class="cluster right-cluster">
+        <button type="button" class="action-btn btn-b" data-btn="run" aria-label="奔跑或开火">B</button>
+        <button type="button" class="action-btn btn-a" data-btn="jump" aria-label="跳跃">A</button>
+      </div>
+    </div>
+  </div>
+
+  <noscript>请启用 JavaScript 后游玩《超级帽侠》。</noscript>
+
+  <script>
+(function (CAP) {
+  "use strict";
+
+  const NOTES = {
+    C2: 65.41, D2: 73.42, E2: 82.41, F2: 87.31, G2: 98.0, A2: 110.0, B2: 123.47,
+    C3: 130.81, D3: 146.83, Eb3: 155.56, E3: 164.81, F3: 174.61, G3: 196.0, A3: 220.0, B3: 246.94,
+    C4: 261.63, D4: 293.66, Eb4: 311.13, E4: 329.63, F4: 349.23, Fs4: 369.99, G4: 392.0, A4: 440.0, B4: 493.88,
+    C5: 523.25, D5: 587.33, Eb5: 622.25, E5: 659.25, F5: 698.46, Fs5: 739.99, G5: 783.99, A5: 880.0, B5: 987.77,
+    C6: 1046.5, D6: 1174.66, E6: 1318.51, F6: 1396.91, G6: 1567.98, A6: 1760.0
+  };
+
+  function n(name) {
+    return NOTES[name] || 0;
+  }
+
+  function createPulseWave(ctx, duty) {
+    const harmonics = 32;
+    const real = new Float32Array(harmonics);
+    const imag = new Float32Array(harmonics);
+    for (let i = 1; i < harmonics; i++) {
+      imag[i] = (2 / (i * Math.PI)) * Math.sin(i * Math.PI * duty);
+    }
+    return ctx.createPeriodicWave(real, imag);
+  }
+
+  class AudioEngine {
+    constructor() {
+      this.ctx = null;
+      this.master = null;
+      this.musicGain = null;
+      this.sfxGain = null;
+      this.muted = false;
+      this.musicEnabled = true;
+      this.currentTrack = null;
+      this.timer = null;
+      this.step = 0;
+      this.pulseWave = null;
+      this.noiseBuffer = null;
+    }
+
+    init() {
+      if (this.ctx) {
+        if (this.ctx.state === "suspended") this.ctx.resume();
+        return;
+      }
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new Ctx();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = this.muted ? 0 : 0.7;
+      this.master.connect(this.ctx.destination);
+
+      this.musicGain = this.ctx.createGain();
+      this.musicGain.gain.value = 0.28;
+      this.musicGain.connect(this.master);
+
+      this.sfxGain = this.ctx.createGain();
+      this.sfxGain.gain.value = 0.45;
+      this.sfxGain.connect(this.master);
+
+      this.pulseWave = createPulseWave(this.ctx, 0.25);
+      this.noiseBuffer = this._makeNoise();
+    }
+
+    _makeNoise() {
+      const len = this.ctx.sampleRate * 1;
+      const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < len; i++) {
+        if (i % 7 === 0) last = Math.random() * 2 - 1;
+        data[i] = last;
+      }
+      return buf;
+    }
+
+    setMuted(m) {
+      this.muted = m;
+      if (this.master) this.master.gain.value = m ? 0 : 0.7;
+    }
+
+    toggleMute() {
+      this.setMuted(!this.muted);
+      return this.muted;
+    }
+
+    _env(node, t, dur, peak, attack, release) {
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(peak, t + attack);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      node.connect(g);
+      g.connect(this.sfxGain);
+      return g;
+    }
+
+    _osc(type, freq, t, dur, peak, slideTo) {
+      const o = this.ctx.createOscillator();
+      if (type === "pulse") {
+        o.setPeriodicWave(this.pulseWave);
+      } else {
+        o.type = type;
+      }
+      o.frequency.setValueAtTime(freq, t);
+      if (slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(20, slideTo), t + dur);
+      this._env(o, t, dur, peak, Math.min(0.01, dur / 8), dur * 0.4);
+      o.start(t);
+      o.stop(t + dur + 0.02);
+    }
+
+    _noise(t, dur, peak, freq) {
+      const src = this.ctx.createBufferSource();
+      src.buffer = this.noiseBuffer;
+      src.loop = true;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.value = freq || 1200;
+      filter.Q.value = 0.8;
+      src.connect(filter);
+      this._env(filter, t, dur, peak, 0.005, dur * 0.5);
+      src.start(t);
+      src.stop(t + dur + 0.02);
+    }
+
+    play(name) {
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+      const sfx = this._sfx[name];
+      if (sfx) sfx.call(this, t);
+    }
+
+    get _sfx() {
+      return {
+        jump: (t) => {
+          this._osc("pulse", 330, t, 0.14, 0.22, 700);
+        },
+        bounce: (t) => {
+          this._osc("square", 280, t, 0.1, 0.18, 520);
+        },
+        coin: (t) => {
+          this._osc("square", 988, t, 0.08, 0.2);
+          this._osc("square", 1319, t + 0.08, 0.22, 0.18);
+        },
+        bump: (t) => {
+          this._osc("triangle", 140, t, 0.08, 0.25, 70);
+          this._noise(t, 0.06, 0.12, 400);
+        },
+        break: (t) => {
+          this._noise(t, 0.18, 0.28, 900);
+          this._osc("square", 200, t, 0.1, 0.1, 60);
+        },
+        stomp: (t) => {
+          this._osc("triangle", 220, t, 0.12, 0.28, 80);
+        },
+        kick: (t) => {
+          this._osc("square", 200, t, 0.08, 0.2, 90);
+          this._noise(t, 0.08, 0.15, 600);
+        },
+        power: (t) => {
+          const seq = [262, 330, 392, 523, 392, 523, 659, 784];
+          seq.forEach((f, i) => this._osc("square", f, t + i * 0.055, 0.07, 0.16));
+        },
+        appear: (t) => {
+          [392, 523, 659, 784].forEach((f, i) => this._osc("square", f, t + i * 0.05, 0.08, 0.14));
+        },
+        oneup: (t) => {
+          [659, 784, 988, 1047, 988, 1319].forEach((f, i) => this._osc("square", f, t + i * 0.07, 0.09, 0.16));
+        },
+        fireball: (t) => {
+          this._osc("square", 180, t, 0.12, 0.12, 90);
+          this._noise(t, 0.08, 0.1, 1800);
+        },
+        pipe: (t) => {
+          this._osc("triangle", 400, t, 0.35, 0.2, 120);
+        },
+        pause: (t) => {
+          this._osc("square", 523, t, 0.08, 0.12);
+          this._osc("square", 392, t + 0.1, 0.1, 0.12);
+        },
+        flag: (t) => {
+          const down = [784, 698, 659, 587, 523, 494, 440, 392];
+          down.forEach((f, i) => this._osc("square", f, t + i * 0.07, 0.08, 0.14));
+        },
+        clear: (t) => {
+          const fan = [523, 659, 784, 1047, 784, 1047, 1319, 1568];
+          fan.forEach((f, i) => this._osc("square", f, t + i * 0.09, 0.12, 0.16));
+        },
+        die: (t) => {
+          this.stopMusic();
+          const seq = [659, 622, 587, 554, 523, 494, 466, 440, 392, 330, 262];
+          seq.forEach((f, i) => this._osc("square", f, t + i * 0.055, 0.08, 0.18, f * 0.85));
+        },
+        gameover: (t) => {
+          this.stopMusic();
+          const seq = [
+            [392, 0.2], [0, 0.08], [330, 0.2], [0, 0.08],
+            [262, 0.18], [247, 0.18], [262, 0.45]
+          ];
+          let at = 0;
+          seq.forEach(([f, d]) => {
+            if (f) this._osc("square", f, t + at, d, 0.16);
+            at += d;
+          });
+        },
+        firework: (t) => {
+          this._noise(t, 0.25, 0.22, 1400);
+          this._osc("square", 880, t, 0.08, 0.1, 400);
+        }
+      };
+    }
+
+    playMusic(track) {
+      this.init();
+      if (this.currentTrack === track && this.timer) return;
+      this.stopMusic();
+      this.currentTrack = track;
+      const song = SONGS[track];
+      if (!song || !this.musicEnabled) return;
+      this.step = 0;
+      this._schedule(song);
+    }
+
+    _schedule(song) {
+      const ctx = this.ctx;
+      const stepDur = 60 / song.bpm / 4;
+      const lookahead = 0.12;
+      let next = ctx.currentTime + 0.05;
+      const len = song.sq1.length;
+
+      const tick = () => {
+        if (!this.timer) return;
+        const now = ctx.currentTime;
+        while (next < now + lookahead) {
+          const i = this.step % len;
+          this._note(this.musicGain, "pulse", song.sq1[i], next, stepDur, 0.11);
+          this._note(this.musicGain, "square", song.sq2[i], next, stepDur, 0.06);
+          this._note(this.musicGain, "triangle", song.tri[i], next, stepDur, 0.14);
+          if (song.noise && song.noise[i]) {
+            this._musicNoise(next, stepDur * 0.7, song.noise[i]);
+          }
+          this.step++;
+          next += stepDur;
+        }
+        this.timer = setTimeout(tick, 40);
+      };
+      this.timer = setTimeout(tick, 0);
+    }
+
+    _note(dest, type, freq, t, dur, peak) {
+      if (!freq) return;
+      const o = this.ctx.createOscillator();
+      if (type === "pulse") o.setPeriodicWave(this.pulseWave);
+      else o.type = type;
+      o.frequency.setValueAtTime(freq, t);
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(peak, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.92);
+      o.connect(g);
+      g.connect(dest);
+      o.start(t);
+      o.stop(t + dur);
+    }
+
+    _musicNoise(t, dur, peak) {
+      const src = this.ctx.createBufferSource();
+      src.buffer = this.noiseBuffer;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = "highpass";
+      filter.frequency.value = 1800;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(peak, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(filter);
+      filter.connect(g);
+      g.connect(this.musicGain);
+      src.start(t);
+      src.stop(t + dur);
+    }
+
+    stopMusic() {
+      if (this.timer) {
+        clearTimeout(this.timer);
+        this.timer = null;
+      }
+      this.currentTrack = null;
+    }
+  }
+
+  function pat(str) {
+    return str.trim().split(/\s+/).map((tok) => (tok === "--" || tok === "0" ? 0 : n(tok)));
+  }
+
+  const SONGS = {
+    overworld: {
+      bpm: 148,
+      sq1: pat(`
+        G5 E5 C5 E5  G5 A5 G5 E5  F5 D5 B4 D5  F5 G5 F5 D5
+        E5 C5 A4 C5  E5 G5 E5 C5  D5 F5 G5 A5  G5 E5 C5 --
+        G5 E5 C5 E5  G5 C6 A5 G5  F5 A5 G5 F5  E5 G5 D5 B4
+        C5 E5 G5 E5  A5 G5 E5 C5  D5 E5 G5 E5  D5 C5 -- --
+      `),
+      sq2: pat(`
+        E4 G4 C5 G4  E4 G4 C5 G4  D4 F4 B4 F4  D4 F4 B4 F4
+        C4 E4 A4 E4  C4 E4 A4 E4  B3 D4 G4 D4  C4 E4 G4 --
+        E4 G4 C5 G4  E4 G4 C5 G4  F4 A4 C5 A4  E4 G4 B4 G4
+        C4 E4 G4 E4  F4 A4 G4 E4  G3 B3 D4 B3  C4 E4 -- --
+      `),
+      tri: pat(`
+        C3 C3 G3 C3  C3 C3 G3 C3  F3 F3 C3 F3  G3 G3 D3 G3
+        A2 A2 E3 A2  A2 A2 E3 A2  G2 G2 D3 G2  C3 G2 C3 --
+        C3 C3 G3 C3  C3 C3 G3 C3  F3 F3 C3 F3  E3 E3 B2 E3
+        A2 A2 E3 A2  F3 F3 C3 F3  G3 G3 D3 G3  C3 G3 C3 G3
+      `),
+      noise: (function () {
+        const a = new Array(64).fill(0);
+        for (let i = 0; i < 64; i++) if (i % 4 === 0) a[i] = 0.04;
+        for (let i = 0; i < 64; i++) if (i % 8 === 4) a[i] = 0.07;
+        return a;
+      })()
+    },
+    underground: {
+      bpm: 112,
+      sq1: pat(`
+        C4 -- Eb4 --  G4 -- Eb4 --  Ab4 G4 Eb4 C4  -- -- -- --
+        B3 -- D4 --   F4 -- D4 --   G4 F4 D4 B3   -- -- -- --
+        C4 -- Eb4 --  G4 -- C5 --   B4 G4 Eb4 C4  -- -- -- --
+        F4 -- Ab4 --  G4 -- Eb4 --  D4 -- B3 --   C4 -- -- --
+      `),
+      sq2: pat(`
+        G3 -- C4 --   Eb4 -- C4 --  F4 Eb4 C4 G3  -- -- -- --
+        F3 -- B3 --   D4 -- B3 --   Eb4 D4 B3 F3  -- -- -- --
+        G3 -- C4 --   Eb4 -- G4 --  F4 Eb4 C4 G3  -- -- -- --
+        C4 -- F4 --   Eb4 -- C4 --  B3 -- G3 --   G3 -- -- --
+      `),
+      tri: pat(`
+        C3 -- -- --   C3 -- G2 --   Ab2 -- -- --  Ab2 -- Eb2 --
+        G2 -- -- --   G2 -- D2 --   C3 -- -- --   G2 -- -- --
+        C3 -- -- --   C3 -- G2 --   F2 -- -- --   G2 -- -- --
+        Ab2 -- -- --  G2 -- -- --   F2 -- G2 --   C3 -- -- --
+      `)
+    },
+    star: {
+      bpm: 200,
+      sq1: pat(`
+        C5 E5 G5 A5  C6 A5 G5 E5  C5 E5 G5 A5  C6 A5 G5 E5
+        D5 Fs5 A5 B5 D6 B5 A5 Fs5 D5 Fs5 A5 B5 D6 B5 A5 Fs5
+      `),
+      sq2: pat(`
+        E4 G4 C5 E5  G4 C5 E5 G5  E4 G4 C5 E5  G4 C5 E5 G5
+        Fs4 A4 D5 Fs5 A4 D5 Fs5 A5 Fs4 A4 D5 Fs5 A4 D5 Fs5 A5
+      `),
+      tri: pat(`
+        C3 G3 C3 G3  C3 G3 C3 G3  C3 G3 C3 G3  C3 G3 C3 G3
+        D3 A3 D3 A3  D3 A3 D3 A3  D3 A3 D3 A3  D3 A3 D3 A3
+      `)
+    },
+    title: {
+      bpm: 132,
+      sq1: pat(`
+        C5 -- E5 G5  -- C6 -- G5  A5 -- F5 --  G5 -- E5 --
+        F5 -- D5 --  E5 -- C5 --  D5 E5 F5 G5  E5 C5 -- --
+        C5 -- E5 G5  -- C6 -- A5  G5 -- E5 --  F5 G5 A5 G5
+        E5 -- C5 --  D5 -- B4 --  C5 -- -- --  -- -- -- --
+      `),
+      sq2: pat(`
+        G4 -- C5 E5  -- G5 -- E5  F5 -- C5 --  E5 -- C5 --
+        D5 -- B4 --  C5 -- G4 --  B4 C5 D5 E5  C5 G4 -- --
+        G4 -- C5 E5  -- G5 -- F5  E5 -- C5 --  D5 E5 F5 E5
+        C5 -- G4 --  B4 -- G4 --  G4 -- -- --  -- -- -- --
+      `),
+      tri: pat(`
+        C3 -- G3 --  C3 -- G3 --  F3 -- C3 --  C3 -- G3 --
+        G2 -- D3 --  C3 -- G2 --  G2 -- D3 --  C3 G3 C3 --
+        C3 -- G3 --  C3 -- G3 --  F3 -- C3 --  G3 -- D3 --
+        A2 -- E3 --  G2 -- D3 --  C3 -- G2 --  C3 -- -- --
+      `)
+    }
+  };
+
+  CAP.audio = new AudioEngine();
+})(window.CAP = window.CAP || {});
+
+;
+(function (CAP) {
+  "use strict";
+
+  const C = {
+    k: [0, 0, 0],
+    w: [252, 252, 252],
+    r: [181, 49, 32],
+    R: [248, 56, 0],
+    s: [252, 160, 68],
+    d: [228, 92, 16],
+    b: [24, 24, 168],
+    B: [92, 148, 252],
+    n: [136, 20, 0],
+    N: [200, 76, 12],
+    o: [248, 216, 0],
+    y: [252, 188, 84],
+    g: [0, 168, 0],
+    G: [128, 208, 16],
+    p: [0, 104, 0],
+    m: [80, 48, 0],
+    M: [184, 112, 48],
+    u: [188, 188, 188],
+    U: [252, 188, 176],
+    h: [252, 188, 176],
+    t: [252, 152, 56],
+    T: [200, 76, 12],
+    f: [248, 248, 248],
+    e: [60, 188, 252],
+    x: [160, 32, 240],
+    z: [252, 116, 180]
+  };
+
+  function compile(rows, map) {
+    map = map || C;
+    const h = rows.length;
+    const w = rows[0].length;
+    const cv = document.createElement("canvas");
+    cv.width = w;
+    cv.height = h;
+    const ctx = cv.getContext("2d");
+    const im = ctx.createImageData(w, h);
+    const data = im.data;
+    for (let y = 0; y < h; y++) {
+      const row = rows[y];
+      for (let x = 0; x < w; x++) {
+        const col = map[row[x]];
+        if (!col) continue;
+        const i = (y * w + x) * 4;
+        data[i] = col[0];
+        data[i + 1] = col[1];
+        data[i + 2] = col[2];
+        data[i + 3] = 255;
+      }
+    }
+    ctx.putImageData(im, 0, 0);
+    return cv;
+  }
+
+  function flip(src) {
+    const cv = document.createElement("canvas");
+    cv.width = src.width;
+    cv.height = src.height;
+    const ctx = cv.getContext("2d");
+    ctx.translate(src.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(src, 0, 0);
+    return cv;
+  }
+
+  function recolor(src, from, to) {
+    const cv = document.createElement("canvas");
+    cv.width = src.width;
+    cv.height = src.height;
+    const ctx = cv.getContext("2d");
+    ctx.drawImage(src, 0, 0);
+    const im = ctx.getImageData(0, 0, cv.width, cv.height);
+    const d = im.data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i] === from[0] && d[i + 1] === from[1] && d[i + 2] === from[2]) {
+        d[i] = to[0]; d[i + 1] = to[1]; d[i + 2] = to[2];
+      }
+    }
+    ctx.putImageData(im, 0, 0);
+    return cv;
+  }
+
+  const smallStand = [
+    "    rrrr    ",
+    "   rrrrrr   ",
+    "  rrrrrrrr  ",
+    "   nsssn    ",
+    "  nsssssn   ",
+    "  nsksskn   ",
+    "  sssssss   ",
+    "  ssdddss   ",
+    "   bbbbb    ",
+    "  bb b bb   ",
+    "  ww b ww   ",
+    "  ww b ww   ",
+    "   nnnnn    ",
+    "   nn nn    ",
+    "   nn nn    ",
+    "            "
+  ];
+
+  const smallWalk1 = [
+    "    rrrr    ",
+    "   rrrrrr   ",
+    "  rrrrrrrr  ",
+    "   nsssn    ",
+    "  nsssssn   ",
+    "  nsksskn   ",
+    "  sssssss   ",
+    "  ssdddss   ",
+    "   bbbbb    ",
+    "  bb b bb   ",
+    "  wwbb ww   ",
+    "   w b w    ",
+    "   nnnn     ",
+    "  nn  nn    ",
+    " nn    n    ",
+    "            "
+  ];
+
+  const smallWalk2 = [
+    "    rrrr    ",
+    "   rrrrrr   ",
+    "  rrrrrrrr  ",
+    "   nsssn    ",
+    "  nsssssn   ",
+    "  nsksskn   ",
+    "  sssssss   ",
+    "  ssdddss   ",
+    "   bbbbb    ",
+    "   bbbbb    ",
+    "   wwwww    ",
+    "   w b w    ",
+    "    nnn     ",
+    "    nn      ",
+    "    nn      ",
+    "            "
+  ];
+
+  const smallJump = [
+    "    rrrr    ",
+    "   rrrrrr   ",
+    "  rrrrrrrr  ",
+    "   nsssn    ",
+    "  nsssssn   ",
+    "  nsksskn   ",
+    "  sssssss   ",
+    "  ssdddss   ",
+    "  bbbbbbb   ",
+    " bb b bb b  ",
+    " ww b bb ww ",
+    " ww     ww  ",
+    "  nn   nn   ",
+    " nn     nn  ",
+    "            ",
+    "            "
+  ];
+
+  const smallSkid = [
+    "    rrrr    ",
+    "   rrrrrr   ",
+    "  rrrrrrrr  ",
+    "   nsssn    ",
+    "  nsksssn   ",
+    "  nsssskn   ",
+    "  sssssss   ",
+    "  ssdddss   ",
+    "   bbbbb    ",
+    "  bbb bb    ",
+    "  www bb    ",
+    "    w bb    ",
+    "   nnnn     ",
+    "  nn  nn    ",
+    "            ",
+    "            "
+  ];
+
+  const smallDie = [
+    "            ",
+    "    rrrr    ",
+    "   rrrrrr   ",
+    "  rrrrrrrr  ",
+    "   nsssn    ",
+    "  nsksskn   ",
+    "  sssssss   ",
+    "  ss k ss   ",
+    "   bbbbb    ",
+    "  bb b bb   ",
+    "  ww b ww   ",
+    "   nnnnn    ",
+    "  nn   nn   ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const bigHead = [
+    "    rrrrrr    ",
+    "   rrrrrrrr   ",
+    "   rrrrrrrr   ",
+    "  rrrrrrrrrr  ",
+    "   nnssssnn   ",
+    "  nnssssssnn  ",
+    "  nnskssksnn  ",
+    "  nssssssssn  ",
+    "   ssssssss   ",
+    "   ssddddss   ",
+    "    ssssss    ",
+    "              "
+  ];
+
+  const bigBodyStand = [
+    "    bbbbbb    ",
+    "   bbbbbbbb   ",
+    "  bb bbbb bb  ",
+    "  ww bbbb ww  ",
+    "  ww bbbb ww  ",
+    "  ww bbbb ww  ",
+    "     bbbb     ",
+    "    nnnnnn    ",
+    "   nnn  nnn   ",
+    "   nnn  nnn   ",
+    "   nnn  nnn   ",
+    "              "
+  ];
+
+  const bigBodyWalk1 = [
+    "    bbbbbb    ",
+    "   bbbbbbbb   ",
+    "  bb bbbb bb  ",
+    "  ww bbbb ww  ",
+    "  ww bbbb ww  ",
+    "   w bbbb w   ",
+    "     bbbb     ",
+    "    nnnnnn    ",
+    "   nnn  nnn   ",
+    "  nnn    nnn  ",
+    " nnn      nn  ",
+    "              "
+  ];
+
+  const bigBodyWalk2 = [
+    "    bbbbbb    ",
+    "   bbbbbbbb   ",
+    "   bbbbbbbb   ",
+    "   wwbbbbww   ",
+    "    wbbbbw    ",
+    "     bbbb     ",
+    "     bbbb     ",
+    "     nnnn     ",
+    "     nnnn     ",
+    "     nnnn     ",
+    "     nnnn     ",
+    "              "
+  ];
+
+  const bigBodyJump = [
+    "    bbbbbb    ",
+    "   bbbbbbbb   ",
+    "  bb bbbb bb  ",
+    "  ww bbbb ww  ",
+    " ww  bbbb  ww ",
+    " ww  bbbb  ww ",
+    "     bbbb     ",
+    "    nnnnnn    ",
+    "   nnn  nnn   ",
+    "  nnn    nnn  ",
+    "              ",
+    "              "
+  ];
+
+  function stack(head, body) {
+    return head.concat(body);
+  }
+
+  const walkerA = [
+    "    nnnn    ",
+    "   nNNNN    ",
+    "  nNNNNnn   ",
+    "  NNNNNNN   ",
+    " nNwNNNwNn  ",
+    " nNNNNNNNn  ",
+    " nNNNNNNNn  ",
+    "  nNNNNNn   ",
+    "  yyyyyyy   ",
+    " yk yyy ky  ",
+    " yy yyy yy  ",
+    "  y  y  y   ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const walkerB = [
+    "    nnnn    ",
+    "   nNNNN    ",
+    "  nNNNNnn   ",
+    "  NNNNNNN   ",
+    " nNwNNNwNn  ",
+    " nNNNNNNNn  ",
+    " nNNNNNNNn  ",
+    "  nNNNNNn   ",
+    "  yyyyyyy   ",
+    " yk yyy ky  ",
+    " yy yyy yy  ",
+    " y   y   y  ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const walkerFlat = [
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "  nNNNNNNn  ",
+    " nNwNNNwNNn ",
+    " nNNNNNNNNn ",
+    "  yyyyyyyy  ",
+    " yk yyyy ky ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const turtleA = [
+    "     gg     ",
+    "    gGGg    ",
+    "   gGGGGg   ",
+    "   gGwGwg   ",
+    "    sssss   ",
+    "   sskssk   ",
+    "  pggggggp  ",
+    " pggGGgGggp ",
+    " pggggggggp ",
+    "  pggggggp  ",
+    "   y    y   ",
+    "   yy  yy   ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const turtleB = [
+    "     gg     ",
+    "    gGGg    ",
+    "   gGGGGg   ",
+    "   gGwGwg   ",
+    "    sssss   ",
+    "   sskssk   ",
+    "  pggggggp  ",
+    " pggGGgGggp ",
+    " pggggggggp ",
+    "  pggggggp  ",
+    "    yy yy   ",
+    "    y   y   ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const shell = [
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "   pggggp   ",
+    "  pggGGggp  ",
+    " pggGGGGggp ",
+    " pggggggggp ",
+    "  pggggggp  ",
+    "   pggggp   ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const plantA = [
+    "  g    g    ",
+    "  Gg  gG    ",
+    "  wGggGw    ",
+    "   GkkG     ",
+    "   GGGG     ",
+    "    pp      ",
+    "    pp      ",
+    "    pp      ",
+    "    pp      ",
+    "    pp      ",
+    "    pp      ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const plantB = [
+    " g      g   ",
+    " Gg    gG   ",
+    " wGggggGw   ",
+    "  GkwwkG    ",
+    "   GGGG     ",
+    "    pp      ",
+    "    pp      ",
+    "    pp      ",
+    "    pp      ",
+    "    pp      ",
+    "    pp      ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const mush = [
+    "    rrrr    ",
+    "   rrwrrr   ",
+    "  rrwwrrrr  ",
+    "  rrrrrrrr  ",
+    "   rrrrrr   ",
+    "    ssss    ",
+    "   skssks   ",
+    "    ssss    ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const oneup = [
+    "    gggg    ",
+    "   ggwggg   ",
+    "  ggwwgggg  ",
+    "  gggggggg  ",
+    "   gggggg   ",
+    "    ssss    ",
+    "   skssks   ",
+    "    ssss    ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const flowerA = [
+    "  o  o  o   ",
+    "   rwrwr    ",
+    "  rwwwwwr   ",
+    "   rwrwr    ",
+    "     g      ",
+    "    gGg     ",
+    "   gG Gg    ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const flowerB = [
+    " o  o  o    ",
+    "  ryryry    ",
+    " ryyyyyyr   ",
+    "  ryryry    ",
+    "     g      ",
+    "    gGg     ",
+    "   gG Gg    ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const starA = [
+    "     o      ",
+    "    oyo     ",
+    " ooooyoooo  ",
+    "  oyyyyyo   ",
+    "   oyyyo    ",
+    "  oyo oyo   ",
+    " oo     oo  ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            "
+  ];
+
+  const coinA = [
+    "    oo    ",
+    "   oyyo   ",
+    "  oywwyo  ",
+    "  oywkyo  ",
+    "  oywkyo  ",
+    "  oywwyo  ",
+    "   oyyo   ",
+    "    oo    "
+  ];
+
+  const coinB = [
+    "    oo    ",
+    "    yy    ",
+    "   ywwy   ",
+    "   ywky   ",
+    "   ywky   ",
+    "   ywwy   ",
+    "    yy    ",
+    "    oo    "
+  ];
+
+  const coinC = [
+    "    o     ",
+    "    y     ",
+    "    y     ",
+    "    y     ",
+    "    y     ",
+    "    y     ",
+    "    y     ",
+    "    o     "
+  ];
+
+  const fireA = [
+    "  oR  ",
+    " oRRo ",
+    " RwwR ",
+    " oRRo ",
+    "  oR  ",
+    "      "
+  ];
+
+  const fireB = [
+    "  Ro  ",
+    " RwwR ",
+    " oRRo ",
+    " RwwR ",
+    "  Ro  ",
+    "      "
+  ];
+
+  function tileGround() {
+    return compile([
+      "NNNNNNNNNNNNNNNN",
+      "NUhUhUhUhUhUhUhN",
+      "UhUhUhUhUhUhUhUh",
+      "hUhUNNNNhUhUNNNh",
+      "NNNNNkkNNNNNkkNN",
+      "kNNkNNNNNkNNNNNk",
+      "NNNNNNNNNNNNNNNN",
+      "NNNkNNNkNNNkNNNN",
+      "kNNNNNNNNNNNNNkN",
+      "NNNNNNkNNNNNNNNN",
+      "NkNNNNNNNNNkNNNN",
+      "NNNNNNNNNNNNNNNN",
+      "NNNNkNNNNNNNkNNN",
+      "kNNNNNNNNNNNNNNN",
+      "NNNNNkNNNNNNNNNk",
+      "kkkkkkkkkkkkkkkk"
+    ]);
+  }
+
+  function tileBrick() {
+    return compile([
+      "yyyyyyyyyyyyyyyy",
+      "NkkkkkkkNkkkkkkk",
+      "NhhhhhhhNhhhhhhh",
+      "NhhhhhhhNhhhhhhh",
+      "yyyyyyyyyyyyyyyy",
+      "kkkkNkkkkkkkNkkk",
+      "hhhhNhhhhhhhNhhh",
+      "hhhhNhhhhhhhNhhh",
+      "yyyyyyyyyyyyyyyy",
+      "NkkkkkkkNkkkkkkk",
+      "NhhhhhhhNhhhhhhh",
+      "NhhhhhhhNhhhhhhh",
+      "yyyyyyyyyyyyyyyy",
+      "kkkkNkkkkkkkNkkk",
+      "hhhhNhhhhhhhNhhh",
+      "kkkkkkkkkkkkkkkk"
+    ]);
+  }
+
+  function tileQuestion(frame) {
+    const marks = [
+      [
+        "                ",
+        "  oooooooooooo  ",
+        " oyyyyyyyyyyyyo ",
+        " oyykkyyyyykyyo ",
+        " oyykkyyyykkyyo ",
+        " oyyyyyyykkyyyo ",
+        " oyyyyyykkyyyyo ",
+        " oyyyyyykkyyyyo ",
+        " oyyyyyyyyyyyyo ",
+        " oyyyyyykkyyyyo ",
+        " oyyyyyyyyyyyyo ",
+        " oyyyyyyyyyyyyo ",
+        "  oooooooooooo  ",
+        "  kkkkkkkkkkkk  ",
+        "                ",
+        "                "
+      ],
+      [
+        "                ",
+        "  yyyyyyyyyyyy  ",
+        " yooooooooooooy ",
+        " yooykyyyyykyoy ",
+        " yooykyyyykyyoy ",
+        " yoyyyyyykyyyoy ",
+        " yoyyyyykyyyyoy ",
+        " yoyyyyykyyyyoy ",
+        " yoyyyyyyyyyyoy ",
+        " yoyyyyykyyyyoy ",
+        " yoyyyyyyyyyyoy ",
+        " yooooooooooooy ",
+        "  yyyyyyyyyyyy  ",
+        "  kkkkkkkkkkkk  ",
+        "                ",
+        "                "
+      ]
+    ];
+    return compile(marks[frame]);
+  }
+
+  function tileUsed() {
+    return compile([
+      "NNNNNNNNNNNNNNNN",
+      "NhhhhhhhhhhhhhhN",
+      "NhhhhhhhhhhhhhhN",
+      "NhhhhhhhhhhhhhhN",
+      "NhhhhhhhhhhhhhhN",
+      "NhhhhhhhhhhhhhhN",
+      "NhhhhhhhhhhhhhhN",
+      "NhhhhhhhhhhhhhhN",
+      "NhhhhhhhhhhhhhhN",
+      "NhhhhhhhhhhhhhhN",
+      "NhhhhhhhhhhhhhhN",
+      "NhhhhhhhhhhhhhhN",
+      "NhhhhhhhhhhhhhhN",
+      "NhhhhhhhhhhhhhhN",
+      "NNNNNNNNNNNNNNNN",
+      "kkkkkkkkkkkkkkkk"
+    ]);
+  }
+
+  function tileHard() {
+    return compile([
+      "uuuuuuuuuuuuuuuu",
+      "uwwwwwwwwwwwwwku",
+      "uwwwwwwwwwwwwwku",
+      "uwwkkkkkkkkwwwku",
+      "uwwkkkkkkkkwwwku",
+      "uwwkkkkkkkkwwwku",
+      "uwwkkkkkkkkwwwku",
+      "uwwwwwwwwwwwwwku",
+      "uwwwwwwwwwwwwwku",
+      "ukkkkkkkkkkkkkku",
+      "ukkkkkkkkkkkkkku",
+      "ukkkkkkkkkkkkkku",
+      "ukkkkkkkkkkkkkku",
+      "ukkkkkkkkkkkkkku",
+      "ukkkkkkkkkkkkkku",
+      "kkkkkkkkkkkkkkkk"
+    ]);
+  }
+
+  function tilePipeTop(side) {
+    const left = [
+      "kkkkkkkkkkkkkkkk",
+      "kGGGGGGGGGGGGGGk",
+      "kGwwwwwwwwwwwwpk",
+      "kGwwwwwwwwwwwwpk",
+      "kGggggggggggggpk",
+      "kGggggggggggggpk",
+      "kGggggggggggggpk",
+      "kGggggggggggggpk",
+      "kGggggggggggggpk",
+      "kGggggggggggggpk",
+      "kGggggggggggggpk",
+      "kGggggggggggggpk",
+      "kGggggggggggggpk",
+      "kGggggggggggggpk",
+      "kGggggggggggggpk",
+      "kGggggggggggggpk"
+    ];
+    const right = left.map((r) => r.split("").reverse().join(""));
+    return compile(side === "L" ? left : right);
+  }
+
+  function tilePipeBody(side) {
+    const left = [
+      "  kGGGGGGGGGpk  ",
+      "  kGwwwwwwwwpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  ",
+      "  kGggggggggpk  "
+    ];
+    const right = left.map((r) => r.split("").reverse().join(""));
+    return compile(side === "L" ? left : right);
+  }
+
+  function makeCloud(size) {
+    const w = size === 2 ? 48 : 32;
+    const rows = [];
+    for (let y = 0; y < 24; y++) rows.push(new Array(w).fill(" "));
+    function plot(x, y, c) {
+      if (y >= 0 && y < 24 && x >= 0 && x < w) rows[y][x] = c;
+    }
+    function bump(cx, cy, r) {
+      for (let y = -r; y <= r; y++) {
+        for (let x = -r; x <= r; x++) {
+          if (x * x + y * y <= r * r) {
+            const px = cx + x, py = cy + y;
+            if (!rows[py] || rows[py][px] === undefined) continue;
+            if (rows[py][px] === " ") plot(px, py, "e");
+          }
+        }
+      }
+      for (let y = -r + 2; y <= r - 1; y++) {
+        for (let x = -r + 2; x <= r - 1; x++) {
+          if (x * x + y * y <= (r - 2) * (r - 2)) plot(cx + x, cy + y, "w");
+        }
+      }
+    }
+    bump(10, 14, 8);
+    bump(20, 10, 9);
+    if (size === 2) bump(34, 14, 8);
+    else bump(28, 14, 7);
+    return compile(rows.map((r) => r.join("")));
+  }
+
+  function makeBush(size) {
+    const w = size === 3 ? 64 : size === 2 ? 48 : 32;
+    const rows = [];
+    for (let y = 0; y < 16; y++) rows.push(new Array(w).fill(" "));
+    function plot(x, y, c) {
+      if (y >= 0 && y < 16 && x >= 0 && x < w) rows[y][x] = c;
+    }
+    function bump(cx, cy, r) {
+      for (let y = -r; y <= r; y++) {
+        for (let x = -r; x <= r; x++) {
+          if (x * x + y * y <= r * r) {
+            const py = cy + y;
+            if (py > 15) continue;
+            if (rows[py] && rows[py][cx + x] === " ") plot(cx + x, py, "p");
+          }
+        }
+      }
+      for (let y = -r + 2; y <= r; y++) {
+        for (let x = -r + 2; x <= r - 1; x++) {
+          if (x * x + y * y <= (r - 2) * (r - 2)) {
+            const py = cy + y;
+            if (py <= 15) plot(cx + x, py, "g");
+          }
+        }
+      }
+    }
+    bump(10, 12, 9);
+    bump(22, 8, 10);
+    if (size >= 2) bump(36, 12, 9);
+    if (size >= 3) bump(50, 10, 9);
+    return compile(rows.map((r) => r.join("")));
+  }
+
+  function makeHill(size) {
+    const w = size === 2 ? 80 : 48;
+    const h = size === 2 ? 35 : 22;
+    const rows = [];
+    for (let y = 0; y < h; y++) rows.push(new Array(w).fill(" "));
+    const cx = w / 2, r = w / 2;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const dx = x - cx + 0.5;
+        const dy = y - (h - 2);
+        if (dx * dx / (r * r) + (dy * dy) / (h * h) <= 1 && dy <= 0) {
+          rows[y][x] = x === Math.floor(cx - r + 8) && y > h / 3 && y < h - 4 ? "w" :
+            (Math.abs(dx) < 2 && y > 4 && y < 12 ? "p" : "g");
+        }
+      }
+    }
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (rows[y][x] === "g" && (x === 0 || rows[y][x - 1] === " ")) rows[y][x] = "p";
+      }
+    }
+    return compile(rows.map((r) => r.join("")));
+  }
+
+  function makeCastle() {
+    const rows = [];
+    const W = 80, H = 80;
+    for (let y = 0; y < H; y++) rows.push(new Array(W).fill(" "));
+    function fill(x, y, w, h, c) {
+      for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+        if (y + j < H && x + i < W && x + i >= 0 && y + j >= 0) rows[y + j][x + i] = c;
+      }
+    }
+    fill(8, 40, 64, 40, "u");
+    fill(0, 24, 20, 56, "u");
+    fill(60, 24, 20, 56, "u");
+    fill(28, 16, 24, 24, "u");
+    for (let x = 0; x < 80; x += 8) {
+      if (x < 20 || x >= 60) fill(x, 16, 6, 8, "u");
+    }
+    fill(32, 0, 16, 16, "u");
+    fill(36, 4, 8, 8, "k");
+    fill(36, 56, 8, 24, "k");
+    fill(12, 32, 8, 8, "k");
+    fill(60, 32, 8, 8, "k");
+    fill(44, 8, 4, 8, "R");
+    return compile(rows.map((r) => r.join("")));
+  }
+
+  function makeFlag() {
+    return compile([
+      "gggggggggggg    ",
+      "gGGwGGwGGwGg    ",
+      "gGGwGGwGGwGg    ",
+      "gGGGGGGGGGGg    ",
+      "gGGwGGwGGwGg    ",
+      "gGGwGGwGGwGg    ",
+      "gGGGGGGGGGGg    ",
+      "gggggggggggg    ",
+      "                ",
+      "                "
+    ]);
+  }
+
+  function makePole() {
+    return compile([
+      " o ",
+      "oyo",
+      " o ",
+      " u ",
+      " u ",
+      " u ",
+      " u ",
+      " u ",
+      " u ",
+      " u ",
+      " u ",
+      " u ",
+      " u ",
+      " u ",
+      " u ",
+      " u "
+    ]);
+  }
+
+  const FONT5 = {
+    "0": ["xxx", "x x", "x x", "x x", "xxx"],
+    "1": ["xx ", " x ", " x ", " x ", "xxx"],
+    "2": ["xxx", "  x", "xxx", "x  ", "xxx"],
+    "3": ["xxx", "  x", "xxx", "  x", "xxx"],
+    "4": ["x x", "x x", "xxx", "  x", "  x"],
+    "5": ["xxx", "x  ", "xxx", "  x", "xxx"],
+    "6": ["xxx", "x  ", "xxx", "x x", "xxx"],
+    "7": ["xxx", "  x", "  x", "  x", "  x"],
+    "8": ["xxx", "x x", "xxx", "x x", "xxx"],
+    "9": ["xxx", "x x", "xxx", "  x", "xxx"],
+    A: ["xxx", "x x", "xxx", "x x", "x x"],
+    B: ["xx ", "x x", "xx ", "x x", "xx "],
+    C: ["xxx", "x  ", "x  ", "x  ", "xxx"],
+    D: ["xx ", "x x", "x x", "x x", "xx "],
+    E: ["xxx", "x  ", "xxx", "x  ", "xxx"],
+    F: ["xxx", "x  ", "xxx", "x  ", "x  "],
+    G: ["xxx", "x  ", "x x", "x x", "xxx"],
+    H: ["x x", "x x", "xxx", "x x", "x x"],
+    I: ["xxx", " x ", " x ", " x ", "xxx"],
+    J: ["  x", "  x", "  x", "x x", "xxx"],
+    K: ["x x", "x x", "xx ", "x x", "x x"],
+    L: ["x  ", "x  ", "x  ", "x  ", "xxx"],
+    M: ["x x", "xxx", "x x", "x x", "x x"],
+    N: ["x x", "xx x", "x x", "x x", "x x"],
+    O: ["xxx", "x x", "x x", "x x", "xxx"],
+    P: ["xxx", "x x", "xxx", "x  ", "x  "],
+    Q: ["xxx", "x x", "x x", "x x", "xxxx"],
+    R: ["xxx", "x x", "xxx", "x x", "x x"],
+    S: ["xxx", "x  ", "xxx", "  x", "xxx"],
+    T: ["xxx", " x ", " x ", " x ", " x "],
+    U: ["x x", "x x", "x x", "x x", "xxx"],
+    V: ["x x", "x x", "x x", "x x", " x "],
+    W: ["x x", "x x", "x x", "xxx", "x x"],
+    X: ["x x", "x x", " x ", "x x", "x x"],
+    Y: ["x x", "x x", " x ", " x ", " x "],
+    Z: ["xxx", "  x", " x ", "x  ", "xxx"],
+    " ": ["   ", "   ", "   ", "   ", "   "],
+    "-": ["   ", "   ", "xxx", "   ", "   "],
+    "×": ["x x", " x ", "x x", "   ", "   "],
+    "!": [" x ", " x ", " x ", "   ", " x "],
+    ".": ["   ", "   ", "   ", "   ", " x "],
+    ":": ["   ", " x ", "   ", " x ", "   "],
+    "©": ["xxx", "x x", "x  ", "x x", "xxx"]
+  };
+
+  FONT5.N = ["xx ", "x x", "x x", "x x", "x x"];
+  FONT5.Q = ["xxx", "x x", "x x", "xx ", "  x"];
+
+  function build() {
+    const mapK = Object.assign({}, C, { k: [16, 16, 16] });
+    const S = {};
+    S.small = {
+      stand: compile(smallStand, mapK),
+      walk: [compile(smallWalk1, mapK), compile(smallStand, mapK), compile(smallWalk2, mapK)],
+      jump: compile(smallJump, mapK),
+      skid: compile(smallSkid, mapK),
+      die: compile(smallDie, mapK)
+    };
+    S.big = {
+      stand: compile(stack(bigHead, bigBodyStand), mapK),
+      walk: [
+        compile(stack(bigHead, bigBodyWalk1), mapK),
+        compile(stack(bigHead, bigBodyStand), mapK),
+        compile(stack(bigHead, bigBodyWalk2), mapK)
+      ],
+      jump: compile(stack(bigHead, bigBodyJump), mapK),
+      skid: compile(stack(bigHead, bigBodyStand), mapK)
+    };
+
+    function fireify(cv) {
+      let out = recolor(cv, C.b, C.w);
+      out = recolor(out, [92, 148, 252], C.w);
+      out = recolor(out, C.r, C.R);
+      return out;
+    }
+    S.fire = {
+      stand: fireify(S.big.stand),
+      walk: S.big.walk.map(fireify),
+      jump: fireify(S.big.jump),
+      skid: fireify(S.big.skid)
+    };
+
+    ["small", "big", "fire"].forEach((k) => {
+      const pack = S[k];
+      pack.standL = flip(pack.stand);
+      pack.jumpL = flip(pack.jump);
+      pack.skidL = flip(pack.skid);
+      pack.walkL = pack.walk.map(flip);
+      if (pack.die) pack.dieL = flip(pack.die);
+    });
+
+    S.walker = [compile(walkerA, mapK), compile(walkerB, mapK)];
+    S.walkerFlat = compile(walkerFlat, mapK);
+    S.turtle = [compile(turtleA, mapK), compile(turtleB, mapK)];
+    S.turtleL = S.turtle.map(flip);
+    S.shell = compile(shell, mapK);
+    S.plant = [compile(plantA, mapK), compile(plantB, mapK)];
+    S.mush = compile(mush, mapK);
+    S.oneup = compile(oneup, mapK);
+    S.flower = [compile(flowerA, mapK), compile(flowerB, mapK)];
+    S.star = compile(starA, mapK);
+    S.coin = [compile(coinA, mapK), compile(coinB, mapK), compile(coinC, mapK), compile(coinB, mapK)];
+    S.fireball = [compile(fireA, mapK), compile(fireB, mapK)];
+    S.ground = tileGround();
+    S.brick = tileBrick();
+    S.q0 = tileQuestion(0);
+    S.q1 = tileQuestion(1);
+    S.used = tileUsed();
+    S.hard = tileHard();
+    S.pipeTL = tilePipeTop("L");
+    S.pipeTR = tilePipeTop("R");
+    S.pipeBL = tilePipeBody("L");
+    S.pipeBR = tilePipeBody("R");
+    S.cloud1 = makeCloud(1);
+    S.cloud2 = makeCloud(2);
+    S.bush1 = makeBush(1);
+    S.bush2 = makeBush(2);
+    S.bush3 = makeBush(3);
+    S.hill1 = makeHill(1);
+    S.hill2 = makeHill(2);
+    S.castle = makeCastle();
+    S.flag = makeFlag();
+    S.pole = makePole();
+    S.font = FONT5;
+    S.brickBit = compile([
+      "yyyy",
+      "NhhN",
+      "hNNh",
+      "kkkk"
+    ]);
+    return S;
+  }
+
+  CAP.buildSprites = build;
+  CAP.compileSprite = compile;
+})(window.CAP = window.CAP || {});
+
+;
+(function (CAP) {
+  "use strict";
+
+  const keys = Object.create(null);
+  const pointers = new Map();
+
+  const state = {
+    left: false,
+    right: false,
+    down: false,
+    jump: false,
+    run: false,
+    pause: false,
+    mute: false,
+    jumpPressed: false,
+    pausePressed: false,
+    mutePressed: false,
+    startPressed: false,
+    anyPressed: false
+  };
+
+  function bind(btn, down) {
+    if (btn === "left") state.left = down;
+    else if (btn === "right") state.right = down;
+    else if (btn === "down") state.down = down;
+    else if (btn === "jump") {
+      if (down && !state.jump) state.jumpPressed = true;
+      state.jump = down;
+    } else if (btn === "run") state.run = down;
+    else if (btn === "pause") {
+      if (down) {
+        state.pausePressed = true;
+        state.startPressed = true;
+      }
+    } else if (btn === "mute") {
+      if (down) state.mutePressed = true;
+    }
+    if (down) state.anyPressed = true;
+  }
+
+  function keyToBtn(e) {
+    const k = e.key;
+    if (k === "ArrowLeft" || k === "a" || k === "A") return "left";
+    if (k === "ArrowRight" || k === "d" || k === "D") return "right";
+    if (k === "ArrowDown" || k === "s" || k === "S") return "down";
+    if (k === " " || k === "z" || k === "Z" || k === "k" || k === "K" || k === "ArrowUp" || k === "w" || k === "W") return "jump";
+    if (k === "Shift" || k === "x" || k === "X" || k === "j" || k === "J") return "run";
+    if (k === "Enter" || k === "p" || k === "P" || k === "Escape") return "pause";
+    if (k === "m" || k === "M") return "mute";
+    return null;
+  }
+
+  window.addEventListener("keydown", (e) => {
+    const btn = keyToBtn(e);
+    if (!btn) return;
+    e.preventDefault();
+    if (e.repeat && (btn === "pause" || btn === "mute")) return;
+    keys[e.code] = true;
+    bind(btn, true);
+  }, { passive: false });
+
+  window.addEventListener("keyup", (e) => {
+    const btn = keyToBtn(e);
+    if (!btn) return;
+    e.preventDefault();
+    keys[e.code] = false;
+    bind(btn, false);
+  }, { passive: false });
+
+  function buttonFromEvent(e) {
+    const el = e.target.closest("[data-btn]");
+    return el ? el.getAttribute("data-btn") : null;
+  }
+
+  function setHeld(btn, down) {
+    document.querySelectorAll("[data-btn='" + btn + "']").forEach((el) => {
+      el.classList.toggle("held", down);
+    });
+  }
+
+  function onPointerDown(e) {
+    const btn = buttonFromEvent(e);
+    if (!btn) return;
+    e.preventDefault();
+    pointers.set(e.pointerId, btn);
+    bind(btn, true);
+    setHeld(btn, true);
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+  }
+
+  function onPointerUp(e) {
+    const btn = pointers.get(e.pointerId) || buttonFromEvent(e);
+    if (!btn) return;
+    e.preventDefault();
+    pointers.delete(e.pointerId);
+    bind(btn, false);
+    setHeld(btn, false);
+  }
+
+  function attach() {
+    const root = document.getElementById("controls");
+    if (!root) return;
+    root.addEventListener("pointerdown", onPointerDown);
+    root.addEventListener("pointerup", onPointerUp);
+    root.addEventListener("pointercancel", onPointerUp);
+    root.addEventListener("contextmenu", (e) => e.preventDefault());
+    document.getElementById("game").addEventListener("pointerdown", () => {
+      state.anyPressed = true;
+      state.startPressed = true;
+    });
+  }
+
+  function consume() {
+    const snap = {
+      left: state.left,
+      right: state.right,
+      down: state.down,
+      jump: state.jump,
+      run: state.run,
+      jumpPressed: state.jumpPressed,
+      pausePressed: state.pausePressed,
+      mutePressed: state.mutePressed,
+      startPressed: state.startPressed,
+      anyPressed: state.anyPressed
+    };
+    state.jumpPressed = false;
+    state.pausePressed = false;
+    state.mutePressed = false;
+    state.startPressed = false;
+    state.anyPressed = false;
+    return snap;
+  }
+
+  CAP.input = { attach, consume, state };
+})(window.CAP = window.CAP || {});
+
+;
+(function (CAP) {
+  "use strict";
+
+  const H = 15;
+
+  function grid(w) {
+    return Array.from({ length: H }, () => Array(w).fill("."));
+  }
+
+  function set(g, x, y, c) {
+    if (y >= 0 && y < H && x >= 0 && x < g[0].length) g[y][x] = c;
+  }
+
+  function fill(g, x, y, w, h, c) {
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) set(g, x + i, y + j, c);
+  }
+
+  function ground(g, x0, x1) {
+    fill(g, x0, 13, x1 - x0, 2, "=");
+  }
+
+  function pipe(g, x, height) {
+    const top = 13 - height;
+    set(g, x, top, "p");
+    set(g, x + 1, top, "q");
+    for (let y = top + 1; y < 13; y++) {
+      set(g, x, y, "P");
+      set(g, x + 1, y, "Q");
+    }
+    return top;
+  }
+
+  function stairs(g, x, steps, dir) {
+    for (let i = 0; i < steps; i++) {
+      const h = dir > 0 ? i + 1 : steps - i;
+      for (let j = 0; j < h; j++) set(g, x + i, 12 - j, "H");
+    }
+  }
+
+  function row(g) {
+    return g.map((r) => r.join(""));
+  }
+
+  function world11() {
+    const W = 230;
+    const g = grid(W);
+    ground(g, 0, 69);
+    ground(g, 72, 86);
+    ground(g, 89, 154);
+    ground(g, 157, 230);
+
+    set(g, 3, 12, "S");
+
+    set(g, 16, 9, "?");
+    fill(g, 20, 9, 3, 1, "#");
+    set(g, 21, 9, "!");
+    set(g, 22, 9, "?");
+    set(g, 22, 5, "?");
+
+    set(g, 22, 12, "g");
+    set(g, 29, 12, "g");
+    set(g, 40, 12, "g");
+    set(g, 42, 12, "g");
+
+    pipe(g, 28, 2);
+    pipe(g, 38, 3);
+    const p3 = pipe(g, 46, 4);
+    set(g, 46, p3, "v");
+    const bonus = pipe(g, 57, 4);
+    set(g, 57, bonus, "W");
+
+    fill(g, 77, 9, 3, 1, "#");
+    set(g, 78, 9, "@");
+    set(g, 80, 5, "?");
+    set(g, 81, 5, "?");
+    fill(g, 94, 9, 8, 1, "#");
+    set(g, 95, 9, "?");
+    set(g, 97, 9, "?");
+    set(g, 96, 5, "+");
+
+    set(g, 82, 12, "k");
+    set(g, 100, 12, "g");
+    set(g, 102, 12, "g");
+    set(g, 113, 12, "k");
+
+    fill(g, 118, 9, 2, 1, "#");
+    set(g, 119, 5, "*");
+    fill(g, 128, 9, 3, 1, "?");
+    set(g, 129, 9, "!");
+
+    pipe(g, 136, 2);
+    pipe(g, 148, 3);
+
+    set(g, 141, 12, "g");
+    set(g, 160, 12, "g");
+    set(g, 162, 12, "k");
+
+    fill(g, 168, 9, 4, 1, "#");
+    set(g, 169, 9, "?");
+    set(g, 171, 5, "?");
+
+    stairs(g, 181, 8, 1);
+    fill(g, 189, 5, 1, 8, "H");
+    fill(g, 194, 12, 2, 1, "H");
+    stairs(g, 196, 4, -1);
+
+    set(g, 210, 12, "F");
+    fill(g, 214, 8, 5, 5, "C");
+
+    return {
+      id: "1-1",
+      name: "草原出发",
+      theme: "overworld",
+      time: 400,
+      tiles: row(g),
+      spawnX: 40,
+      spawnY: 176,
+      flagX: 210,
+      castleX: 214,
+      next: "1-2",
+      decor: [
+        { t: "hill", s: 2, x: 0, y: 13 },
+        { t: "bush", s: 3, x: 11, y: 13 },
+        { t: "cloud", s: 1, x: 8, y: 3 },
+        { t: "cloud", s: 2, x: 19, y: 2 },
+        { t: "hill", s: 1, x: 48, y: 13 },
+        { t: "bush", s: 1, x: 60, y: 13 },
+        { t: "cloud", s: 1, x: 56, y: 3 },
+        { t: "cloud", s: 2, x: 88, y: 2 },
+        { t: "bush", s: 2, x: 90, y: 13 },
+        { t: "hill", s: 2, x: 108, y: 13 },
+        { t: "cloud", s: 1, x: 120, y: 3 },
+        { t: "bush", s: 3, x: 164, y: 13 },
+        { t: "cloud", s: 2, x: 170, y: 2 },
+        { t: "hill", s: 1, x: 200, y: 13 }
+      ],
+      warps: [{ x: 57, dest: "bonus", dir: "down" }]
+    };
+  }
+
+  function bonus() {
+    const W = 48;
+    const g = grid(W);
+    fill(g, 0, 0, W, 1, "#");
+    fill(g, 0, 1, 1, 12, "#");
+    fill(g, W - 1, 1, 1, 12, "#");
+    ground(g, 0, W);
+    fill(g, 4, 8, 16, 1, "o");
+    fill(g, 6, 6, 12, 1, "o");
+    fill(g, 8, 4, 8, 1, "o");
+    fill(g, 22, 9, 3, 1, "#");
+    set(g, 23, 9, "!");
+    set(g, 3, 12, "S");
+    pipe(g, 40, 3);
+    set(g, 40, 10, "w");
+    return {
+      id: "bonus",
+      name: "金币密室",
+      theme: "underground",
+      time: 200,
+      tiles: row(g),
+      spawnX: 48,
+      spawnY: 176,
+      flagX: -1,
+      next: "1-1",
+      decor: [],
+      warps: [{ x: 40, dest: "1-1", dir: "down", outX: 960, outY: 192 }],
+      bonus: true
+    };
+  }
+
+  function world12() {
+    const W = 210;
+    const g = grid(W);
+    fill(g, 0, 0, W, 2, "#");
+    ground(g, 0, 48);
+    ground(g, 51, 90);
+    ground(g, 94, 140);
+    ground(g, 144, 210);
+    fill(g, 0, 2, 1, 11, "#");
+    fill(g, W - 1, 2, 1, 11, "#");
+
+    set(g, 3, 12, "S");
+    fill(g, 10, 9, 5, 1, "#");
+    set(g, 12, 9, "?");
+    set(g, 14, 9, "!");
+    set(g, 18, 12, "g");
+    set(g, 22, 12, "g");
+    pipe(g, 28, 3);
+    set(g, 28, 10, "v");
+
+    fill(g, 36, 7, 8, 1, "o");
+    fill(g, 38, 9, 4, 1, "#");
+    set(g, 40, 9, "@");
+
+    set(g, 54, 12, "k");
+    set(g, 60, 12, "g");
+    fill(g, 64, 5, 6, 1, "#");
+    set(g, 66, 5, "?");
+    fill(g, 72, 9, 3, 1, "#");
+
+    pipe(g, 80, 4);
+    fill(g, 98, 8, 10, 1, "o");
+    fill(g, 100, 10, 6, 1, "#");
+    set(g, 108, 12, "g");
+    set(g, 110, 12, "k");
+    set(g, 118, 12, "g");
+
+    fill(g, 122, 9, 4, 1, "?");
+    set(g, 123, 9, "*");
+    stairs(g, 150, 6, 1);
+    fill(g, 156, 7, 1, 6, "H");
+    pipe(g, 168, 2);
+    set(g, 180, 12, "g");
+    stairs(g, 186, 5, 1);
+    set(g, 198, 12, "F");
+    fill(g, 202, 8, 5, 5, "C");
+
+    return {
+      id: "1-2",
+      name: "地下通道",
+      theme: "underground",
+      time: 400,
+      tiles: row(g),
+      spawnX: 40,
+      spawnY: 176,
+      flagX: 198,
+      castleX: 202,
+      next: "1-3",
+      decor: []
+    };
+  }
+
+  function world13() {
+    const W = 220;
+    const g = grid(W);
+    ground(g, 0, 16);
+    ground(g, 20, 32);
+    ground(g, 36, 48);
+    ground(g, 54, 70);
+    ground(g, 76, 88);
+    ground(g, 94, 110);
+    ground(g, 118, 128);
+    ground(g, 136, 220);
+
+    set(g, 3, 12, "S");
+    fill(g, 10, 9, 3, 1, "?");
+    set(g, 11, 9, "!");
+    set(g, 24, 12, "g");
+    fill(g, 26, 8, 4, 1, "#");
+    set(g, 28, 8, "?");
+
+    fill(g, 40, 6, 5, 1, "H");
+    set(g, 42, 6, "@");
+    set(g, 41, 5, "o");
+    set(g, 42, 5, "o");
+    set(g, 43, 5, "o");
+    set(g, 58, 12, "k");
+    set(g, 64, 12, "g");
+    fill(g, 66, 9, 3, 1, "#");
+    pipe(g, 82, 3);
+    set(g, 82, 10, "v");
+
+    fill(g, 98, 7, 6, 1, "H");
+    fill(g, 100, 4, 4, 1, "o");
+    set(g, 102, 7, "*");
+    set(g, 104, 12, "g");
+    set(g, 122, 12, "k");
+
+    fill(g, 140, 9, 5, 1, "#");
+    set(g, 142, 9, "?");
+    set(g, 144, 5, "?");
+    set(g, 152, 12, "g");
+    set(g, 154, 12, "g");
+
+    stairs(g, 170, 8, 1);
+    fill(g, 178, 5, 2, 8, "H");
+    stairs(g, 184, 5, -1);
+    set(g, 200, 12, "F");
+    fill(g, 206, 8, 5, 5, "C");
+
+    return {
+      id: "1-3",
+      name: "云端跳跃",
+      theme: "overworld",
+      time: 300,
+      tiles: row(g),
+      spawnX: 40,
+      spawnY: 176,
+      flagX: 200,
+      castleX: 206,
+      next: "win",
+      decor: [
+        { t: "cloud", s: 2, x: 6, y: 2 },
+        { t: "cloud", s: 1, x: 30, y: 3 },
+        { t: "hill", s: 1, x: 0, y: 13 },
+        { t: "cloud", s: 2, x: 70, y: 2 },
+        { t: "bush", s: 2, x: 100, y: 13 },
+        { t: "cloud", s: 1, x: 130, y: 3 },
+        { t: "cloud", s: 2, x: 160, y: 2 },
+        { t: "hill", s: 2, x: 190, y: 13 }
+      ]
+    };
+  }
+
+  CAP.levels = {
+    "1-1": world11,
+    "1-2": world12,
+    "1-3": world13,
+    bonus: bonus
+  };
+})(window.CAP = window.CAP || {});
+
+;
+(function (CAP) {
+  "use strict";
+
+  const TILE = 16;
+  const VIEW_W = 256;
+  const VIEW_H = 240;
+  const HUD = 32;
+  const DT = 1000 / 60;
+
+  const SOLID = /[=#?!@+*XHpPqQvWw]/;
+  const BLOCK = /[#?!@+*]/;
+  const QBLOCK = /[?!@+*]/;
+
+  let canvas, ctx, SPR;
+  let acc = 0;
+  let last = 0;
+  let frame = 0;
+  let state = "title";
+  let inp = null;
+
+  const save = {
+    lives: 3,
+    coins: 0,
+    score: 0,
+    world: "1-1",
+    power: 0
+  };
+
+  let world = null;
+  let player = null;
+  let ents = [];
+  let particles = [];
+  let pops = [];
+  let camX = 0;
+  let timeLeft = 400;
+  let timeAcc = 0;
+  let bump = new Map();
+  let fireballs = [];
+  let invuln = 0;
+  let starT = 0;
+  let deadT = 0;
+  let clearT = 0;
+  let startT = 0;
+  let pipeT = 0;
+  let pipeWarp = null;
+  let toastT = 0;
+  let toastMsg = "";
+  let paused = false;
+  let combo = 0;
+  let growFlash = 0;
+  let flagSlide = 0;
+  let fireCd = 0;
+  let returnOut = null;
+
+  function showToast(msg, t) {
+    toastMsg = msg;
+    toastT = t || 120;
+    const el = document.getElementById("toast");
+    if (el) {
+      el.textContent = msg;
+      el.classList.remove("hidden");
+    }
+  }
+
+  function hideToast() {
+    const el = document.getElementById("toast");
+    if (el) el.classList.add("hidden");
+  }
+
+  function pad(n, w) {
+    let s = String(Math.max(0, n | 0));
+    while (s.length < w) s = "0" + s;
+    return s;
+  }
+
+  function aabb(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  function loadLevel(id, opts) {
+    opts = opts || {};
+    const maker = CAP.levels[id];
+    if (!maker) return;
+    const spec = maker();
+    const tiles = spec.tiles.map((r) => r.split(""));
+    const W = tiles[0].length;
+    const H = tiles.length;
+    ents = [];
+    particles = [];
+    pops = [];
+    fireballs = [];
+    bump = new Map();
+    combo = 0;
+    camX = 0;
+    timeLeft = spec.bonus || opts.keepTime ? timeLeft : spec.time;
+    timeAcc = 0;
+    starT = 0;
+    invuln = 40;
+    growFlash = 0;
+    flagSlide = 0;
+    fireCd = 0;
+
+    let sx = spec.spawnX, sy = spec.spawnY;
+    if (opts.outX != null) {
+      sx = opts.outX;
+      sy = opts.outY;
+    }
+
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const c = tiles[y][x];
+        const px = x * TILE, py = y * TILE;
+        if (c === "S") {
+          if (!opts.outX) {
+            sx = px + 2;
+            sy = py;
+          }
+          tiles[y][x] = ".";
+        } else if (c === "g") {
+          ents.push(makeWalker(px, py));
+          tiles[y][x] = ".";
+        } else if (c === "k") {
+          ents.push(makeTurtle(px, py));
+          tiles[y][x] = ".";
+        } else if (c === "v") {
+          ents.push(makePlant(px, py, x));
+          tiles[y][x] = "p";
+        } else if (c === "o") {
+          ents.push(makeCoin(px + 3, py + 2));
+          tiles[y][x] = ".";
+        } else if (c === "F" || c === "C") {
+          tiles[y][x] = ".";
+        }
+      }
+    }
+
+    world = {
+      id: spec.id,
+      name: spec.name,
+      theme: spec.theme,
+      tiles: tiles,
+      W: W,
+      H: H,
+      spec: spec
+    };
+
+    const power = save.power;
+    player = makePlayer(sx, sy, power);
+    if (power > 0) player.y -= 16;
+    camX = Math.max(0, Math.min(player.x - 80, Math.max(0, W * TILE - VIEW_W)));
+
+    if (state !== "start") {
+      const music = starT ? "star" : spec.theme === "underground" ? "underground" : "overworld";
+      CAP.audio.playMusic(music);
+    }
+  }
+
+  function tileAt(tx, ty) {
+    if (!world || ty < 0 || tx < 0 || tx >= world.W) return "=";
+    if (ty >= world.H) return ".";
+    return world.tiles[ty][tx];
+  }
+
+  function isSolid(c) {
+    return SOLID.test(c);
+  }
+
+  function setTile(tx, ty, c) {
+    if (ty >= 0 && ty < world.H && tx >= 0 && tx < world.W) world.tiles[ty][tx] = c;
+  }
+
+  function solidsIn(x, y, w, h) {
+    const x0 = Math.floor(x / TILE);
+    const y0 = Math.floor(y / TILE);
+    const x1 = Math.floor((x + w - 0.01) / TILE);
+    const y1 = Math.floor((y + h - 0.01) / TILE);
+    const hits = [];
+    for (let ty = y0; ty <= y1; ty++) {
+      for (let tx = x0; tx <= x1; tx++) {
+        const c = tileAt(tx, ty);
+        if (isSolid(c)) hits.push({ tx: tx, ty: ty, c: c });
+      }
+    }
+    return hits;
+  }
+
+  function makePlayer(x, y, power) {
+    return {
+      x: x,
+      y: y,
+      w: 12,
+      h: power > 0 ? 32 : 16,
+      vx: 0,
+      vy: 0,
+      facing: 1,
+      power: power || 0,
+      onGround: false,
+      skid: false,
+      walkF: 0,
+      duck: false,
+      dead: false,
+      pole: false
+    };
+  }
+
+  function makeWalker(x, y) {
+    return { kind: "walker", x: x, y: y, w: 16, h: 16, vx: -0.5, vy: 0, dead: false, flat: 0, facing: -1 };
+  }
+
+  function makeTurtle(x, y) {
+    return { kind: "turtle", x: x, y: y, w: 16, h: 16, vx: -0.45, vy: 0, dead: false, shell: 0, facing: -1 };
+  }
+
+  function makePlant(x, y) {
+    return { kind: "plant", x: x + 1, y: y + 8, w: 14, h: 24, homeY: y + 8, phase: 0, t: 40 + (x % 90), dead: false };
+  }
+
+  function makeCoin(x, y) {
+    return { kind: "coin", x: x, y: y, w: 10, h: 14, dead: false, f: 0 };
+  }
+
+  function makeItem(kind, x, y) {
+    return { kind: kind, x: x, y: y, w: 16, h: 16, vx: kind === "mush" || kind === "oneup" ? 0.7 : 0, vy: -2, emerge: 16, dead: false };
+  }
+
+  function addScore(n, x, y) {
+    save.score += n;
+    if (x != null) pops.push({ t: 50, x: x, y: y, text: String(n) });
+  }
+
+  function addCoin() {
+    save.coins++;
+    CAP.audio.play("coin");
+    if (save.coins >= 100) {
+      save.coins = 0;
+      save.lives++;
+      CAP.audio.play("oneup");
+      showToast("1UP", 80);
+    }
+  }
+
+  function spawnDebris(tx, ty) {
+    const px = tx * TILE + 8, py = ty * TILE + 8;
+    const dirs = [[-2, -4], [2, -4], [-1.2, -2.5], [1.2, -2.5]];
+    dirs.forEach((d) => {
+      particles.push({ x: px, y: py, vx: d[0], vy: d[1], t: 40, spr: "brick" });
+    });
+  }
+
+  function stompScore() {
+    combo++;
+    const table = [100, 200, 400, 800, 1000, 2000, 4000, 8000];
+    const n = table[Math.min(combo, table.length) - 1];
+    if (combo >= 8) {
+      save.lives++;
+      CAP.audio.play("oneup");
+      pops.push({ t: 50, x: player.x, y: player.y, text: "1UP" });
+    } else {
+      addScore(n, player.x, player.y);
+    }
+  }
+
+  function hurtPlayer() {
+    if (invuln > 0 || starT > 0 || player.dead || player.pole) return;
+    if (player.power > 0) {
+      player.power = 0;
+      save.power = 0;
+      player.h = 16;
+      player.y += 16;
+      invuln = 90;
+      growFlash = 20;
+      CAP.audio.play("pipe");
+    } else {
+      killPlayer();
+    }
+  }
+
+  function killPlayer() {
+    if (player.dead) return;
+    player.dead = true;
+    player.vy = -6;
+    player.vx = 0;
+    deadT = 0;
+    save.power = 0;
+    CAP.audio.play("die");
+    state = "dead";
+  }
+
+  function bumpBlock(tx, ty, fromBelow) {
+    if (!fromBelow) return;
+    const c = tileAt(tx, ty);
+    bump.set(tx + "," + ty, 8);
+    ents.forEach((e) => {
+      if (e.dead) return;
+      if (e.y + e.h <= ty * TILE + 2 && e.x + e.w > tx * TILE && e.x < tx * TILE + TILE && e.y + e.h > ty * TILE - 8) {
+        if (e.kind === "walker" || e.kind === "turtle") {
+          e.vy = -4;
+          e.vx = -e.vx;
+        }
+      }
+    });
+
+    if (QBLOCK.test(c)) {
+      setTile(tx, ty, "X");
+      CAP.audio.play("bump");
+      const px = tx * TILE, py = ty * TILE;
+      if (c === "?") {
+        ents.push({ kind: "popcoin", x: px + 4, y: py, t: 18, dead: false });
+        addCoin();
+        addScore(200, px, py - 8);
+      } else if (c === "!") {
+        ents.push(makeItem(player.power === 0 ? "mush" : "flower", px, py - 16));
+        CAP.audio.play("appear");
+      } else if (c === "@") {
+        ents.push(makeItem(player.power === 0 ? "mush" : "flower", px, py - 16));
+        CAP.audio.play("appear");
+      } else if (c === "+") {
+        ents.push(makeItem("oneup", px, py - 16));
+        CAP.audio.play("appear");
+      } else if (c === "*") {
+        ents.push(makeItem("star", px, py - 16));
+        CAP.audio.play("appear");
+      }
+    } else if (c === "#") {
+      if (player.power > 0) {
+        setTile(tx, ty, ".");
+        spawnDebris(tx, ty);
+        CAP.audio.play("break");
+        addScore(50);
+      } else {
+        CAP.audio.play("bump");
+      }
+    } else {
+      CAP.audio.play("bump");
+    }
+  }
+
+  function moveActor(e, gravity) {
+    e.vy += gravity;
+    if (e.vy > 4.8) e.vy = 4.8;
+    e.x += e.vx;
+    const hitsX = solidsIn(e.x, e.y + 1, e.w, e.h - 2);
+    if (hitsX.length) {
+      if (e.vx > 0) e.x = hitsX[0].tx * TILE - e.w;
+      else e.x = (hitsX[0].tx + 1) * TILE;
+      if (e.kind === "shell" || (e.kind === "turtle" && e.shell === 2)) e.vx *= -1;
+      else if (e.kind === "walker" || e.kind === "turtle" || e.kind === "mush" || e.kind === "oneup" || e.kind === "star") e.vx *= -1;
+      else if (e.kind === "fireball") e.dead = true;
+      e.facing = e.vx >= 0 ? 1 : -1;
+    }
+    e.y += e.vy;
+    const hitsY = solidsIn(e.x + 1, e.y, e.w - 2, e.h);
+    let grounded = false;
+    if (hitsY.length) {
+      if (e.vy >= 0) {
+        e.y = hitsY[0].ty * TILE - e.h;
+        e.vy = 0;
+        grounded = true;
+        if (e.kind === "fireball") e.vy = -2.2;
+      } else {
+        e.y = (hitsY[0].ty + 1) * TILE;
+        e.vy = 0;
+      }
+    }
+    return grounded;
+  }
+
+  function updatePlayer() {
+    if (player.dead || player.pole) return;
+
+    if (growFlash > 0) growFlash--;
+    if (invuln > 0) invuln--;
+    if (starT > 0) {
+      starT--;
+      if (starT === 0) {
+        const music = world.theme === "underground" ? "underground" : "overworld";
+        CAP.audio.playMusic(music);
+      }
+    }
+    if (fireCd > 0) fireCd--;
+
+    const run = inp.run;
+    const max = run ? 2.55 : 1.4;
+    const accx = run ? 0.14 : 0.08;
+    player.skid = false;
+    const wantDuck = player.power > 0 && inp.down && player.onGround;
+    if (wantDuck && !player.duck) {
+      player.duck = true;
+      if (player.h > 16) {
+        player.y += player.h - 16;
+        player.h = 16;
+      }
+    } else if (!wantDuck && player.duck) {
+      if (!solidsIn(player.x, player.y - 16, player.w, 16).length) {
+        player.y -= 16;
+        player.h = 32;
+        player.duck = false;
+      }
+    }
+
+    if (!player.duck) {
+      if (inp.left) {
+        if (player.vx > 0.3) player.skid = true;
+        player.vx -= player.skid ? 0.2 : accx;
+        player.facing = -1;
+      } else if (inp.right) {
+        if (player.vx < -0.3) player.skid = true;
+        player.vx += player.skid ? 0.2 : accx;
+        player.facing = 1;
+      } else {
+        if (Math.abs(player.vx) < 0.08) player.vx = 0;
+        else player.vx *= 0.86;
+      }
+    } else {
+      if (Math.abs(player.vx) < 0.08) player.vx = 0;
+      else player.vx *= 0.8;
+    }
+    if (player.vx > max) player.vx = max;
+    if (player.vx < -max) player.vx = -max;
+
+    if (inp.jumpPressed && player.onGround) {
+      player.vy = Math.abs(player.vx) > 1.6 ? -6.15 : -5.55;
+      player.onGround = false;
+      CAP.audio.play("jump");
+      combo = 0;
+      try { navigator.vibrate && navigator.vibrate(8); } catch (e) { /* ignore */ }
+    }
+
+    const grav = player.vy < 0 && inp.jump ? 0.16 : 0.38;
+    player.vy += grav;
+    if (player.vy > 4.6) player.vy = 4.6;
+
+    player.x += player.vx;
+    if (player.x < camX) player.x = camX;
+    if (player.x < 0) player.x = 0;
+    if (player.x > world.W * TILE - player.w) player.x = world.W * TILE - player.w;
+
+    const hx = solidsIn(player.x, player.y + 2, player.w, player.h - 4);
+    if (hx.length) {
+      if (player.vx > 0) player.x = hx[0].tx * TILE - player.w;
+      else if (player.vx < 0) player.x = (hx[0].tx + 1) * TILE;
+      player.vx = 0;
+    }
+
+    player.y += player.vy;
+    player.onGround = false;
+    const hy = solidsIn(player.x + 1, player.y, player.w - 2, player.h);
+    if (hy.length) {
+      if (player.vy >= 0) {
+        player.y = hy[0].ty * TILE - player.h;
+        player.vy = 0;
+        player.onGround = true;
+      } else {
+        const hit = hy.reduce((a, b) => (b.ty > a.ty ? b : a));
+        player.y = (hit.ty + 1) * TILE;
+        player.vy = 0.2;
+        bumpBlock(hit.tx, hit.ty, true);
+      }
+    }
+
+    if (player.y > world.H * TILE + 8) killPlayer();
+
+    if (Math.abs(player.vx) > 0.2 && player.onGround) player.walkF += run ? 0.35 : 0.22;
+    else if (player.onGround) player.walkF = 0;
+
+    if (player.power === 2 && inp.run && fireCd === 0 && fireballs.length < 2 && !player.duck) {
+      fireballs.push({
+        kind: "fireball",
+        x: player.x + (player.facing > 0 ? player.w : -6),
+        y: player.y + 8,
+        w: 8, h: 8,
+        vx: player.facing * 3.2,
+        vy: 1,
+        t: 90,
+        dead: false,
+        f: 0
+      });
+      fireCd = 12;
+      CAP.audio.play("fireball");
+    }
+
+    tryWarp();
+    tryFlag();
+  }
+
+  function tryWarp() {
+    if (!player.onGround || !inp.down) return;
+    const warps = world.spec.warps;
+    if (!warps) return;
+    const cx = player.x + player.w / 2;
+    const ty = Math.floor((player.y + player.h + 1) / TILE);
+    warps.forEach((w) => {
+      const px = w.x * TILE;
+      if (cx < px + 2 || cx > px + 30) return;
+      const c = tileAt(Math.floor(cx / TILE), ty);
+      if ("pqPQwW".indexOf(c) === -1) return;
+      pipeWarp = w;
+      pipeT = 0;
+      state = "pipe";
+      CAP.audio.play("pipe");
+    });
+  }
+
+  function tryFlag() {
+    if (world.spec.flagX < 0 || player.pole) return;
+    const fx = world.spec.flagX * TILE + 4;
+    if (player.x + player.w > fx && player.x < fx + 8 && player.y < 13 * TILE) {
+      player.pole = true;
+      player.x = fx - 4;
+      player.vx = 0;
+      flagSlide = 0;
+      state = "clear";
+      clearT = 0;
+      CAP.audio.stopMusic();
+      CAP.audio.play("flag");
+      addScore(Math.max(100, (12 * TILE - player.y) * 5 | 0), player.x, player.y);
+    }
+  }
+
+  function updateEnts() {
+    ents.forEach((e) => {
+      if (e.dead && e.kind !== "walker") return;
+      if (e.kind === "walker") updateWalker(e);
+      else if (e.kind === "turtle") updateTurtle(e);
+      else if (e.kind === "plant") updatePlant(e);
+      else if (e.kind === "coin") {
+        e.f++;
+        if (!player.dead && aabb(player, e)) {
+          e.dead = true;
+          addCoin();
+          addScore(200, e.x, e.y);
+        }
+      } else if (e.kind === "popcoin") {
+        e.y -= 1.6;
+        e.t--;
+        if (e.t <= 0) e.dead = true;
+      } else if (e.kind === "mush" || e.kind === "oneup" || e.kind === "flower" || e.kind === "star") {
+        updateItem(e);
+      }
+    });
+    ents = ents.filter((e) => !e.dead || (e.flat && e.flat > 0));
+
+    fireballs.forEach((f) => {
+      f.t--;
+      f.f++;
+      moveActor(f, 0.25);
+      if (f.t <= 0 || f.y > world.H * TILE) f.dead = true;
+      ents.forEach((e) => {
+        if (f.dead || e.dead) return;
+        if ((e.kind === "walker" || e.kind === "turtle" || e.kind === "plant") && aabb(f, e)) {
+          f.dead = true;
+          defeatEnemy(e, true);
+        }
+      });
+    });
+    fireballs = fireballs.filter((f) => !f.dead);
+
+    particles.forEach((p) => {
+      p.vy += 0.3;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.t--;
+    });
+    particles = particles.filter((p) => p.t > 0);
+    pops.forEach((p) => { p.y -= 0.4; p.t--; });
+    pops = pops.filter((p) => p.t > 0);
+
+    bump.forEach((v, k) => {
+      if (v <= 0) bump.delete(k);
+      else bump.set(k, v - 1);
+    });
+  }
+
+  function defeatEnemy(e, flip) {
+    if (e.kind === "plant") {
+      e.dead = true;
+      addScore(200, e.x, e.y);
+      CAP.audio.play("stomp");
+      return;
+    }
+    if (flip) {
+      e.dead = true;
+      particles.push({ x: e.x, y: e.y, vx: 1.2, vy: -3, t: 50, spr: e.kind, flip: true });
+      addScore(200, e.x, e.y);
+      CAP.audio.play("kick");
+    } else if (e.kind === "walker") {
+      e.flat = 24;
+      e.vx = 0;
+      e.h = 8;
+      e.y += 8;
+      stompScore();
+      CAP.audio.play("stomp");
+    } else if (e.kind === "turtle") {
+      if (e.shell === 0) {
+        e.shell = 1;
+        e.vx = 0;
+        e.h = 14;
+        stompScore();
+        CAP.audio.play("stomp");
+      } else if (e.shell === 2) {
+        e.shell = 1;
+        e.vx = 0;
+        stompScore();
+        CAP.audio.play("stomp");
+      } else {
+        e.shell = 2;
+        e.vx = player.facing * 4;
+        CAP.audio.play("kick");
+        addScore(400, e.x, e.y);
+      }
+    }
+  }
+
+  function updateWalker(e) {
+    if (e.flat > 0) {
+      e.flat--;
+      if (e.flat <= 0) e.dead = true;
+      return;
+    }
+    if (e.x + e.w < camX - 32 || e.x > camX + VIEW_W + 160) return;
+    moveActor(e, 0.35);
+    if (e.y > world.H * TILE) e.dead = true;
+    collideEnemy(e);
+  }
+
+  function updateTurtle(e) {
+    if (e.x + e.w < camX - 32 || e.x > camX + VIEW_W + 180) return;
+    if (e.shell === 1) {
+      e.vx = 0;
+    }
+    moveActor(e, 0.35);
+    if (e.y > world.H * TILE) e.dead = true;
+    if (e.shell === 2) {
+      ents.forEach((o) => {
+        if (o === e || o.dead) return;
+        if ((o.kind === "walker" || o.kind === "turtle") && aabb(e, o)) defeatEnemy(o, true);
+      });
+    }
+    collideEnemy(e);
+  }
+
+  function updatePlant(e) {
+    const dist = Math.abs(player.x + player.w / 2 - (e.x + 7));
+    e.t--;
+    if (e.t <= 0) {
+      e.phase = (e.phase + 1) % 4;
+      e.t = e.phase === 1 || e.phase === 3 ? 50 : 70;
+    }
+    let target = e.homeY + 24;
+    if ((e.phase === 1 || e.phase === 2) && dist > 24) target = e.homeY - 16;
+    e.y += (target - e.y) * 0.12;
+    if (!player.dead && aabb(player, { x: e.x, y: e.y, w: e.w, h: Math.max(8, e.homeY + 16 - e.y) })) {
+      if (starT > 0) defeatEnemy(e, true);
+      else hurtPlayer();
+    }
+  }
+
+  function updateItem(e) {
+    if (e.emerge > 0) {
+      e.emerge--;
+      e.y -= 1;
+      return;
+    }
+    if (e.kind === "flower") e.vx = 0;
+    if (e.kind === "star") {
+      if (e.vy === 0) e.vy = -3.5;
+      moveActor(e, 0.2);
+    } else if (e.kind !== "flower") {
+      moveActor(e, 0.3);
+    }
+    if (!player.dead && aabb(player, e)) collectItem(e);
+  }
+
+  function collectItem(e) {
+    e.dead = true;
+    if (e.kind === "mush") {
+      if (player.power === 0) {
+        player.power = 1;
+        save.power = 1;
+        player.y -= 16;
+        player.h = 32;
+        growFlash = 18;
+      }
+      CAP.audio.play("power");
+      addScore(1000, e.x, e.y);
+    } else if (e.kind === "flower") {
+      player.power = 2;
+      save.power = 2;
+      if (player.h < 32) {
+        player.y -= 16;
+        player.h = 32;
+      }
+      CAP.audio.play("power");
+      addScore(1000, e.x, e.y);
+    } else if (e.kind === "oneup") {
+      save.lives++;
+      CAP.audio.play("oneup");
+      pops.push({ t: 50, x: e.x, y: e.y, text: "1UP" });
+    } else if (e.kind === "star") {
+      starT = 480;
+      CAP.audio.play("power");
+      CAP.audio.playMusic("star");
+      addScore(1000, e.x, e.y);
+    }
+  }
+
+  function collideEnemy(e) {
+    if (player.dead || player.pole || e.dead || e.flat) return;
+    if (!aabb(player, e)) return;
+    if (starT > 0) {
+      defeatEnemy(e, true);
+      return;
+    }
+    const feet = player.y + player.h;
+    const stomp = !player.onGround && player.vy >= -0.2 && feet <= e.y + 12;
+    if (stomp) {
+      defeatEnemy(e, false);
+      player.vy = inp.jump ? -4.6 : -2.8;
+      player.y = e.y - player.h;
+      try { navigator.vibrate && navigator.vibrate(12); } catch (err) { /* ignore */ }
+      return;
+    }
+    if (e.kind === "turtle" && e.shell === 1) {
+      e.shell = 2;
+      e.vx = (player.x + player.w / 2 < e.x + e.w / 2 ? 4 : -4);
+      CAP.audio.play("kick");
+      invuln = Math.max(invuln, 8);
+      return;
+    }
+    if (e.kind === "turtle" && e.shell === 2 && Math.abs(e.vx) > 1) {
+      const fromTop = player.y + player.h - 4 < e.y + 6;
+      if (fromTop) return;
+    }
+    hurtPlayer();
+  }
+
+  function updateCamera() {
+    const target = player.x - 80;
+    if (target > camX) camX = target;
+    if (player.x < camX + 24) camX = player.x - 24;
+    if (camX < 0) camX = 0;
+    const max = world.W * TILE - VIEW_W;
+    if (camX > max) camX = Math.max(0, max);
+  }
+
+  function updatePlay() {
+    if (inp.pausePressed) {
+      paused = !paused;
+      CAP.audio.play("pause");
+      if (paused) CAP.audio.stopMusic();
+      else CAP.audio.playMusic(starT ? "star" : world.theme === "underground" ? "underground" : "overworld");
+    }
+    if (paused) return;
+    timeAcc++;
+    if (timeAcc >= 24) {
+      timeAcc = 0;
+      timeLeft--;
+      if (timeLeft <= 0) {
+        timeLeft = 0;
+        killPlayer();
+        return;
+      }
+    }
+    updatePlayer();
+    updateEnts();
+    updateCamera();
+  }
+
+  function updateDead() {
+    deadT++;
+    player.vy += 0.25;
+    player.y += player.vy;
+    if (deadT > 140) {
+      save.lives--;
+      save.power = 0;
+      if (save.lives < 0) {
+        state = "gameover";
+        deadT = 0;
+        CAP.audio.play("gameover");
+      } else {
+        state = "start";
+        startT = 0;
+        loadLevel(save.world);
+      }
+    }
+  }
+
+  function updateClear() {
+    clearT++;
+    if (clearT < 70) {
+      const ground = 13 * TILE - player.h;
+      if (player.y < ground) player.y += 2.2;
+      else player.y = ground;
+    } else if (clearT === 70) {
+      CAP.audio.play("clear");
+    } else if (clearT < 140) {
+      player.facing = 1;
+      player.x += 1.4;
+      player.walkF += 0.3;
+      player.pole = false;
+      const ground = 13 * TILE - player.h;
+      player.y = ground;
+    } else if (timeLeft > 0) {
+      timeLeft--;
+      save.score += 50;
+      if (clearT % 4 === 0) CAP.audio.play("coin");
+    } else {
+      if (world.spec.next === "win") {
+        state = "win";
+        clearT = 0;
+      } else {
+        save.world = world.spec.next;
+        state = "start";
+        startT = 0;
+        loadLevel(save.world);
+      }
+    }
+  }
+
+  function updatePipe() {
+    pipeT++;
+    player.y += 1.4;
+    player.vx = 0;
+    if (pipeT > 40) {
+      const w = pipeWarp;
+      if (w.dest === "1-1" && w.outX) {
+        state = "play";
+        loadLevel("1-1", { outX: w.outX, outY: w.outY, keepTime: true });
+        CAP.audio.play("pipe");
+      } else {
+        state = "play";
+        loadLevel(w.dest);
+        CAP.audio.play("pipe");
+      }
+    }
+  }
+
+  function tick() {
+    if (inp.mutePressed) {
+      const m = CAP.audio.toggleMute();
+      showToast(m ? "静音" : "音效开", 60);
+    }
+
+    if (state === "title") {
+      if (inp.startPressed || inp.jumpPressed || inp.anyPressed) {
+        CAP.audio.init();
+        save.lives = 3;
+        save.coins = 0;
+        save.score = 0;
+        save.world = "1-1";
+        save.power = 0;
+        state = "start";
+        startT = 0;
+        loadLevel("1-1");
+      }
+    } else if (state === "start") {
+      startT++;
+      if (startT > 90) {
+        state = "play";
+        const music = world.theme === "underground" ? "underground" : "overworld";
+        CAP.audio.playMusic(music);
+        if (world.id === "1-1" && save.lives === 3 && save.score === 0) showToast("水管上按 ▼ 进入", 150);
+      }
+    } else if (state === "play") updatePlay();
+    else if (state === "dead") updateDead();
+    else if (state === "clear") updateClear();
+    else if (state === "pipe") updatePipe();
+    else if (state === "gameover") {
+      deadT++;
+      if (deadT > 180 && (inp.startPressed || inp.jumpPressed)) {
+        state = "title";
+        CAP.audio.playMusic("title");
+      }
+    } else if (state === "win") {
+      clearT++;
+      if (clearT > 240 && (inp.startPressed || inp.jumpPressed)) {
+        state = "title";
+        CAP.audio.playMusic("title");
+      }
+    }
+
+    if (toastT > 0) {
+      toastT--;
+      if (toastT <= 0) hideToast();
+    }
+    frame++;
+  }
+
+  function skyColor() {
+    if (!world) return "#5C94FC";
+    return world.theme === "underground" ? "#000000" : "#5C94FC";
+  }
+
+  function drawText(x, y, text, scale, color) {
+    scale = scale || 1;
+    color = color || "#FCFCFC";
+    text = String(text).toUpperCase();
+    ctx.fillStyle = color;
+    for (let i = 0; i < text.length; i++) {
+      const g = SPR.font[text[i]] || SPR.font[" "];
+      if (!g) continue;
+      for (let row = 0; row < g.length; row++) {
+        const line = g[row];
+        for (let col = 0; col < line.length; col++) {
+          if (line[col] === "x") {
+            ctx.fillRect(x + (i * 4 + col) * scale, y + row * scale, scale, scale);
+          }
+        }
+      }
+    }
+  }
+
+  function drawSpr(img, x, y, flipH) {
+    if (!img) return;
+    const dx = Math.round(x - camX);
+    const dy = Math.round(y);
+    if (dx + img.width < 0 || dx > VIEW_W) return;
+    if (flipH) {
+      ctx.save();
+      ctx.translate(dx + img.width, dy);
+      ctx.scale(-1, 1);
+      ctx.drawImage(img, 0, 0);
+      ctx.restore();
+    } else {
+      ctx.drawImage(img, dx, dy);
+    }
+  }
+
+  function tileSprite(c) {
+    if (c === "=") return SPR.ground;
+    if (c === "#") return SPR.brick;
+    if (QBLOCK.test(c)) return (frame >> 3) % 2 ? SPR.q0 : SPR.q1;
+    if (c === "X") return SPR.used;
+    if (c === "H") return SPR.hard;
+    if (c === "p" || c === "v" || c === "W" || c === "w") return SPR.pipeTL;
+    if (c === "q") return SPR.pipeTR;
+    if (c === "P") return SPR.pipeBL;
+    if (c === "Q") return SPR.pipeBR;
+    return null;
+  }
+
+  function drawWorld() {
+    ctx.fillStyle = skyColor();
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+    if (world && world.spec.decor) {
+      world.spec.decor.forEach((d) => {
+        let spr = null;
+        if (d.t === "cloud") spr = d.s === 2 ? SPR.cloud2 : SPR.cloud1;
+        else if (d.t === "bush") spr = d.s === 3 ? SPR.bush3 : d.s === 2 ? SPR.bush2 : SPR.bush1;
+        else if (d.t === "hill") spr = d.s === 2 ? SPR.hill2 : SPR.hill1;
+        if (!spr) return;
+        const x = d.x * TILE;
+        const y = d.t === "cloud" ? d.y * TILE : d.y * TILE - spr.height;
+        drawSpr(spr, x, y, false);
+      });
+    }
+
+    if (!world) return;
+    const tx0 = Math.max(0, Math.floor(camX / TILE) - 1);
+    const tx1 = Math.min(world.W - 1, Math.floor((camX + VIEW_W) / TILE) + 1);
+    for (let ty = 0; ty < world.H; ty++) {
+      for (let tx = tx0; tx <= tx1; tx++) {
+        const c = world.tiles[ty][tx];
+        const spr = tileSprite(c);
+        if (!spr) continue;
+        let oy = 0;
+        const b = bump.get(tx + "," + ty);
+        if (b) oy = -Math.min(4, b);
+        ctx.drawImage(spr, Math.round(tx * TILE - camX), ty * TILE + oy);
+      }
+    }
+
+    if (world.spec.flagX >= 0) {
+      const fx = world.spec.flagX * TILE;
+      for (let i = 0; i < 10; i++) {
+        ctx.drawImage(SPR.pole, Math.round(fx + 6 - camX), 32 + i * 16);
+      }
+      const fy = 36 + (state === "clear" ? Math.min(140, clearT * 2.2) : 0);
+      drawSpr(SPR.flag, fx - 10, fy, false);
+    }
+    if (world.spec.castleX) {
+      drawSpr(SPR.castle, world.spec.castleX * TILE - 8, 13 * TILE - SPR.castle.height, false);
+    }
+  }
+
+  function playerSprite() {
+    const pack = player.power === 2 ? SPR.fire : player.power === 1 ? SPR.big : SPR.small;
+    const left = player.facing < 0;
+    if (player.dead) return left ? SPR.small.dieL : SPR.small.die;
+    if (!player.onGround && !player.pole) return left ? pack.jumpL : pack.jump;
+    if (player.skid) return left ? pack.skidL : pack.skid;
+    if (Math.abs(player.vx) > 0.15 && player.onGround) {
+      const frames = left ? pack.walkL : pack.walk;
+      return frames[(player.walkF | 0) % frames.length];
+    }
+    return left ? pack.standL : pack.stand;
+  }
+
+  function drawEntities() {
+    ents.forEach((e) => {
+      if (e.kind === "walker") {
+        const spr = e.flat ? SPR.walkerFlat : SPR.walker[(frame >> 3) % 2];
+        drawSpr(spr, e.x, e.y + (e.flat ? -8 : 0), e.vx > 0);
+      } else if (e.kind === "turtle") {
+        if (e.shell) drawSpr(SPR.shell, e.x, e.y, false);
+        else drawSpr(e.vx > 0 ? SPR.turtleL[(frame >> 3) % 2] : SPR.turtle[(frame >> 3) % 2], e.x, e.y, false);
+      } else if (e.kind === "plant") {
+        drawSpr(SPR.plant[(frame >> 4) % 2], e.x - 1, e.y, false);
+      } else if (e.kind === "coin" || e.kind === "popcoin") {
+        drawSpr(SPR.coin[(frame >> 2) % 4], e.x, e.y, false);
+      } else if (e.kind === "mush") drawSpr(SPR.mush, e.x, e.y, false);
+      else if (e.kind === "oneup") drawSpr(SPR.oneup, e.x, e.y, false);
+      else if (e.kind === "flower") drawSpr(SPR.flower[(frame >> 3) % 2], e.x, e.y, false);
+      else if (e.kind === "star") drawSpr(SPR.star, e.x, e.y, false);
+    });
+    fireballs.forEach((f) => drawSpr(SPR.fireball[(f.f >> 1) % 2], f.x, f.y, false));
+    particles.forEach((p) => {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.t / 40);
+      if (p.spr === "brick") ctx.drawImage(SPR.brickBit, Math.round(p.x - camX), p.y);
+      ctx.restore();
+    });
+    pops.forEach((p) => drawText(Math.round(p.x - camX), p.y, p.text, 1, "#FCFCFC"));
+  }
+
+  function drawPlayer() {
+    if ((invuln > 0 || growFlash > 0) && (frame & 2) && !player.dead) return;
+    if (starT > 0 && (frame & 1)) {
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+    }
+    const spr = playerSprite();
+    const dx = player.x - (spr.width - player.w) / 2;
+    const dy = player.y + player.h - spr.height;
+    drawSpr(spr, dx, dy, false);
+    if (starT > 0 && (frame & 1)) ctx.restore();
+  }
+
+  function drawHUD() {
+    ctx.fillStyle = "rgba(0,0,0,0.15)";
+    ctx.fillRect(0, 0, VIEW_W, 28);
+    drawText(8, 6, "CAP", 1, "#FCFCFC");
+    drawText(8, 14, pad(save.score, 6), 1, "#FCFCFC");
+    ctx.drawImage(SPR.coin[0], 88, 10);
+    drawText(100, 14, "X" + pad(save.coins, 2), 1, "#FCFCFC");
+    drawText(160, 6, "WORLD", 1, "#FCFCFC");
+    drawText(168, 14, world ? world.id : "1-1", 1, "#FCFCFC");
+    drawText(216, 6, "TIME", 1, "#FCFCFC");
+    drawText(224, 14, pad(timeLeft, 3), 1, timeLeft < 100 ? "#F83800" : "#FCFCFC");
+  }
+
+  function drawTitle() {
+    ctx.fillStyle = "#5C94FC";
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    ctx.drawImage(SPR.hill2, 10, 208 - SPR.hill2.height);
+    ctx.drawImage(SPR.bush3, 140, 208 - SPR.bush3.height);
+    ctx.drawImage(SPR.cloud2, 160, 24);
+    ctx.drawImage(SPR.cloud1, 40, 40);
+    for (let x = 0; x < 16; x++) ctx.drawImage(SPR.ground, x * 16, 208);
+
+    drawText(52, 36, "SUPER", 3, "#F83800");
+    drawText(40, 58, "CAP QUEST", 3, "#FCFCFC");
+    drawText(70, 86, "SUPER CAP QUEST", 1, "#F8D800");
+
+    ctx.drawImage(SPR.small.stand, 78, 192);
+    ctx.drawImage(SPR.walker[(frame >> 4) % 2], 148, 192);
+    ctx.drawImage(SPR.coin[0], 188, 196);
+
+    if ((frame >> 4) & 1) drawText(52, 112, "TAP OR PRESS START", 1, "#FCFCFC");
+    drawText(36, 132, "A JUMP   B RUN FIRE", 1, "#1818A8");
+    drawText(16, 228, "ORIGINAL TRIBUTE GAME", 1, "#FCFCFC");
+  }
+
+  function drawOverlay() {
+    if (state === "start") {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      drawText(88, 80, "WORLD " + save.world, 1, "#FCFCFC");
+      ctx.drawImage(SPR.small.stand, 100, 110);
+      drawText(122, 118, "X " + Math.max(0, save.lives), 1, "#FCFCFC");
+      if (world) drawText(80, 150, world.name, 1, "#F8D800");
+    }
+    if (state === "play" && paused) {
+      ctx.fillStyle = "rgba(0,0,0,0.45)";
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      drawText(92, 110, "PAUSED", 2, "#FCFCFC");
+    }
+    if (state === "gameover") {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      drawText(76, 110, "GAME OVER", 2, "#F83800");
+      drawText(64, 150, "TAP TO CONTINUE", 1, "#FCFCFC");
+    }
+    if (state === "win") {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      drawText(40, 70, "WORLD CLEAR", 2, "#F8D800");
+      drawText(52, 110, "THANKS FOR PLAYING", 1, "#FCFCFC");
+      drawText(68, 140, "SCORE " + pad(save.score, 6), 1, "#FCFCFC");
+      if ((frame >> 4) & 1) drawText(64, 180, "TAP TO TITLE", 1, "#FCFCFC");
+      if (clearT % 40 === 10) CAP.audio.play("firework");
+    }
+  }
+
+  function render() {
+    ctx.imageSmoothingEnabled = false;
+    if (state === "title") {
+      drawTitle();
+      return;
+    }
+    drawWorld();
+    drawEntities();
+    if (player) drawPlayer();
+    drawHUD();
+    drawOverlay();
+  }
+
+  function loop(t) {
+    if (!last) last = t;
+    acc += Math.min(100, t - last);
+    last = t;
+    inp = CAP.input.consume();
+    while (acc >= DT) {
+      tick();
+      acc -= DT;
+    }
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  function boot() {
+    canvas = document.getElementById("game");
+    ctx = canvas.getContext("2d");
+    SPR = CAP.buildSprites();
+    CAP.input.attach();
+    CAP.audio.init();
+    try { CAP.audio.playMusic("title"); } catch (e) { /* wait for gesture */ }
+    requestAnimationFrame(loop);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+})(window.CAP = window.CAP || {});
+
+</script>
+</body>
+</html>
